@@ -11,7 +11,7 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/headerImage"
         android:layout_width="match_parent"
-        android:layout_height="280dp"
+        android:layout_height="320dp"
         android:scaleType="centerCrop"
         android:src="@drawable/logo"
         app:shapeAppearanceOverlay="@style/RoundedBottomImage" />
@@ -87,7 +87,7 @@
             android:inputType="textPassword"
             android:background="@android:drawable/edit_text"
             android:padding="10dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnLogin"
