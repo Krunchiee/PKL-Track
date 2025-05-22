@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/welcomeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D6F15E"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".WelcomeActivity">
+
+    <TextView
+    android:id="@+id/welcomeText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/welcome"
+    android:textSize="20sp"
+    android:textColor="#ffffff"
+    android:layout_marginBottom="4dp"
+    android:layout_gravity="start"
+    android:layout_marginStart="24dp"/>
+
+    <TextView
+    android:id="@+id/appTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/app_title"
+    android:textSize="26sp"
+    android:textColor="#ffffff"
+    android:layout_marginBottom="20dp"
+    android:layout_gravity="start"
+    android:layout_marginStart="24dp"/>
+
+    <ImageView
+    android:id="@+id/logoImage"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    android:src="@drawable/logo"
+    android:layout_marginTop="70dp"
+    android:layout_marginBottom="70dp"
+    android:contentDescription="@string/logo_sekolah" />
+
+    <Button
+    android:id="@+id/signInButton"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:text="@string/sign_in"
+    android:backgroundTint="#ffffff"
+    android:textColor="#D6F15E"/>
+</LinearLayout>

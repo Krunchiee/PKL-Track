@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">PKL Track</string>
+    <string name="welcome">WELCOME</string>
+    <string name="app_title"><b>PKL</b> Track</string>
+    <string name="sign_in">Sign In</string>
+    <string name="logo_sekolah">Logo Sekolah</string>
+    <string name="background_image_desc">Background Image</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">LOGIN</string>
+</resources>
