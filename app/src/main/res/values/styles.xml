@@ -8,4 +8,10 @@
         <item name="cornerSizeBottomRight">200dp</item>
     </style>
 
+    <style name="NoText" parent="@android:style/TextAppearance">
+        <item name="android:textSize">0sp</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
 </resources>
