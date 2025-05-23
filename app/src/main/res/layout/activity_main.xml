@@ -52,6 +52,7 @@
 
     <!-- Pendaftaran -->
     <LinearLayout
+        android:id="@+id/pendaftaran_pkl"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@drawable/rounded_shadow"
@@ -74,6 +75,7 @@
 
     <!-- Absensi -->
     <LinearLayout
+        android:id="@+id/absensi"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@drawable/rounded_shadow"
@@ -96,6 +98,7 @@
 
     <!-- Laporan Harian -->
     <LinearLayout
+        android:id="@+id/laporan_harian"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@drawable/rounded_shadow"

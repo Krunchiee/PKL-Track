@@ -3,6 +3,9 @@ package com.example.pkltrack
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -15,6 +18,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var pendaftaranpkl: LinearLayout
+    private lateinit var absensi: LinearLayout
+    private lateinit var laporanHarian: LinearLayout
     private val slideInterval = 10000L // 3 seconds
 
     private val images = listOf(
@@ -61,6 +67,19 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+
+        //untuk membawa data ke header
+        val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
+        val username   = pref.getString("username", "User")
+        val nisJurusan = pref.getString("nisJurusan", "00000000 - Jurusan")
+
+        findViewById<TextView>(R.id.txtUser).text        = username
+        findViewById<TextView>(R.id.txtNISJurusan).text  = nisJurusan
+
+        absensi = findViewById(R.id.absensi)
+        absensi.setOnClickListener {
+            startActivity(Intent(this, AbsenActivity::class.java))
         }
     }
 
