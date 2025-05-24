@@ -4,7 +4,7 @@
     android:id="@+id/welcomeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#D6F15E"
+    android:background="@color/light_green"
     android:orientation="vertical"
     android:gravity="center"
     tools:context=".WelcomeActivity">
@@ -46,5 +46,5 @@
     android:layout_height="wrap_content"
     android:text="@string/sign_in"
     android:backgroundTint="#ffffff"
-    android:textColor="#D6F15E"/>
+    android:textColor="@color/black"/>
 </LinearLayout>
