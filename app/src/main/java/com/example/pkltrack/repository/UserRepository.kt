@@ -6,6 +6,8 @@ import com.example.pkltrack.model.User
 
 class UserRepository(private val dataSource: UserDataSource = DummyUserDataSource()) {
 
-    fun login(username: String, password: String): User? =
-        dataSource.login(username, password)
+//    fun login(username: String, password: String): User? =
+//        dataSource.login(username, password)
+    fun login(username: String): User? =
+        dataSource.login(username)
 }

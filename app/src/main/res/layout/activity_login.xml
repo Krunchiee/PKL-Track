@@ -81,23 +81,23 @@
             android:id="@+id/editUsername"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="@string/username"
-            android:autofillHints="username"
-            android:inputType="text"
+            android:hint="NISN"
+            android:autofillHints="NISN"
+            android:inputType="number"
             android:background="@android:drawable/edit_text"
             android:padding="10dp"
             android:layout_marginBottom="12dp" />
 
-        <EditText
-            android:id="@+id/editPassword"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="@string/password"
-            android:inputType="textPassword"
-            android:autofillHints="password"
-            android:background="@android:drawable/edit_text"
-            android:padding="10dp"
-            android:layout_marginBottom="16dp" />
+<!--        <EditText-->
+<!--            android:id="@+id/editPassword"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="50dp"-->
+<!--            android:hint="@string/password"-->
+<!--            android:inputType="textPassword"-->
+<!--            android:autofillHints="password"-->
+<!--            android:background="@android:drawable/edit_text"-->
+<!--            android:padding="10dp"-->
+<!--            android:layout_marginBottom="16dp" />-->
 
         <Button
             android:id="@+id/btnLogin"

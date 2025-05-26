@@ -24,7 +24,7 @@ class LoginActivity : AppCompatActivity() {
 
         val backButton = findViewById<ImageButton>(R.id.backButton)
         val usernameEditText = findViewById<EditText>(R.id.editUsername)
-        val passwordEditText = findViewById<EditText>(R.id.editPassword)
+//        val passwordEditText = findViewById<EditText>(R.id.editPassword)
         val loginButton = findViewById<Button>(R.id.btnLogin)
 
         backButton.setOnClickListener {
@@ -33,12 +33,14 @@ class LoginActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             val username = usernameEditText.text.toString().trim()
-            val password = passwordEditText.text.toString().trim()
+//            val password = passwordEditText.text.toString().trim()
 
-            if (username.isEmpty() || password.isEmpty()) {
+//            if (username.isEmpty() || password.isEmpty()) {
+            if (username.isEmpty()) {
                 Toast.makeText(this, "Username dan Password harus diisi", Toast.LENGTH_SHORT).show()
             } else {
-                val user = userRepo.login(username, password)
+//                val user = userRepo.login(username, password)
+                val user = userRepo.login(username)
                 if (user != null) {
                     // --- simpan di SharedPreferences ---
                     val pref = getSharedPreferences("UserData", MODE_PRIVATE)

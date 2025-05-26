@@ -1,8 +1,11 @@
 package com.example.pkltrack
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +20,7 @@ class AbsenActivity : AppCompatActivity() {
     private lateinit var txtLiveTime: TextView
     private lateinit var txtLiveDate: TextView
     private lateinit var recyclerHistory: RecyclerView
+    private lateinit var btnClockInActivity: Button
     private val handler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +30,7 @@ class AbsenActivity : AppCompatActivity() {
         txtLiveTime = findViewById(R.id.txtLiveTime)
         txtLiveDate = findViewById(R.id.txtLiveDate)
         recyclerHistory = findViewById(R.id.recyclerHistory)
+        btnClockInActivity= findViewById(R.id.btnClockIn)
 
         // Tampilkan waktu dan tanggal sekarang
         updateTime()
@@ -47,6 +52,10 @@ class AbsenActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.txtUser).text        = username
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisJurusan
+
+        btnClockInActivity.setOnClickListener {
+            startActivity(Intent(this, ClockInActivity::class.java))
+        }
     }
 
     private fun updateTime() {
