@@ -1,14 +1,20 @@
 package com.example.pkltrack
 
-import android.util.Log
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.widget.*
+import android.text.SpannableString
+import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -23,21 +29,24 @@ import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
-import java.text.SimpleDateFormat
-import java.util.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONObject
+import org.osmdroid.views.overlay.Polygon
+import retrofit2.HttpException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import android.text.Spannable
+import android.text.style.ForegroundColorSpan
 
 class ClockInActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
@@ -60,6 +69,9 @@ class ClockInActivity : AppCompatActivity() {
     private lateinit var btnBack: ImageView
 
     private var currentGeo: GeoPoint? = null
+
+    private var centerLocation: GeoPoint? = null
+    private var allowedRadiusMeters: Double = 1000.0
 
     companion object {
         private const val REQ_LOCATION = 1001
@@ -90,14 +102,12 @@ class ClockInActivity : AppCompatActivity() {
 
         // ---- Retrofit ----
         apiService = ApiClient.service
+        fetchCenterLocation()
 
         // ---- Map init ----
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
-        val defaultPoint = GeoPoint(-6.175392, 106.827153) // Monas
         mapView.controller.setZoom(15.0)
-        mapView.controller.setCenter(defaultPoint)
-        addMarker(defaultPoint, "Monas")
 
         // ---- Fused Location ----
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -108,7 +118,7 @@ class ClockInActivity : AppCompatActivity() {
         // ---- Listeners ----
         btnRefresh.setOnClickListener { refreshLocation()}
         btnClockIn.setOnClickListener { saveAndSendClockIn() }
-        btnBack.setOnClickListener { finish() }
+        btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         // ---- Initial location ----
         refreshLocation()
@@ -122,10 +132,23 @@ class ClockInActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQ_LOCATION)
     }
 
+    private fun fetchCenterLocation() {
+        centerLocation = GeoPoint(-6.200000, 106.816666)
+    }
+
+    private fun isWithinRadius(current: GeoPoint, center: GeoPoint, radiusMeters: Double): Boolean {
+        val results = FloatArray(1)
+        Location.distanceBetween(
+            current.latitude, current.longitude,
+            center.latitude, center.longitude,
+            results
+        )
+        return results[0] <= radiusMeters
+    }
+
     private fun refreshLocation() {
         if (hasLocationPermission()) {
             getCurrentLocation()
-            Log.d("tes","tolol")
         } else {
             requestLocationPermission()
         }
@@ -133,22 +156,74 @@ class ClockInActivity : AppCompatActivity() {
 
 
     @SuppressLint("MissingPermission")
-    private fun getCurrentLocation()  {
-        val currentTask: Task<Location> = fusedLocationProviderClient.getCurrentLocation(
+//    private fun getCurrentLocation()  {
+//        val currentTask: Task<Location> = fusedLocationProviderClient.getCurrentLocation(
+//            PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
+//        )
+//        currentTask.addOnCompleteListener { task ->
+//            if (task.isSuccessful && task.result != null) {
+//                val result = task.result
+//                val address = runBlocking {getAddressFromCoordinates(result.latitude, result.longitude)}
+//
+//                currentGeo = GeoPoint(result.latitude, result.longitude)
+//                txtLocation.text = "${address}"
+//                updateMap(currentGeo!!, "Lokasi Anda")
+//                drawRadiusCircle(currentGeo!!, allowedRadiusMeters)
+//            } else {
+//                    txtLocation.text = "Lokasi tidak ditemukan"
+//                }
+//            }.addOnFailureListener {
+//                Toast.makeText(this, "Gagal mendapatkan lokasi", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+
+    private fun getCurrentLocation() {
+        val currentTask = fusedLocationProviderClient.getCurrentLocation(
             PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
         )
+
         currentTask.addOnCompleteListener { task ->
             if (task.isSuccessful && task.result != null) {
-                val result = task.result
-                val address = runBlocking {getAddressFromCoordinates(result.latitude, result.longitude)}
-                txtLocation.text = "${address}"
-                currentGeo = GeoPoint(result.latitude, result.longitude)
-                updateMap(currentGeo!!, "Lokasi Anda")
-            } else {
-                    txtLocation.text = "Lokasi tidak ditemukan"
+                val loc = task.result
+                currentGeo = GeoPoint(loc.latitude, loc.longitude)
+
+                // --- alamat via reverse geocode ---
+                lifecycleScope.launch {
+                    val address =
+                        withContext(Dispatchers.IO) { getAddressFromCoordinates(loc.latitude, loc.longitude) }
+                            ?: "${loc.latitude}, ${loc.longitude}"
+
+                    // --- cek radius (jika centerLocation tersedia) ---
+                    val inside = centerLocation?.let {
+                        isWithinRadius(currentGeo!!, it, allowedRadiusMeters)
+                    } ?: true   // jika center belum ada, anggap di dalam
+
+                    // build string + warna
+                    if (inside) {
+                        txtLocation.text = address
+
+                    } else {
+                        val warning = " | Di Luar Radius (1 KM)"
+                        val fullText = "$address$warning"
+                        val spannable = SpannableString(fullText)
+                        spannable.setSpan(
+                            ForegroundColorSpan(Color.parseColor("#FF0000")),
+                            address.length,                   // mulai dari sini
+                            fullText.length,                  // sampai akhir
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                        txtLocation.text = spannable
+                    }
+
+                    // update peta & lingkaran 1 km di posisi user
+                    updateMap(currentGeo!!, "Lokasi Anda")
+                    drawRadiusCircle(currentGeo!!, allowedRadiusMeters)
                 }
-            }.addOnFailureListener {
-                Toast.makeText(this, "Gagal mendapatkan lokasi", Toast.LENGTH_SHORT).show()
+            } else {
+                txtLocation.text = "Lokasi tidak ditemukan"
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Gagal mendapatkan lokasi", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -181,6 +256,18 @@ class ClockInActivity : AppCompatActivity() {
         }
     }
 
+    private fun drawRadiusCircle(center: GeoPoint, radiusMeters: Double) {
+        val circle = Polygon()
+        circle.points = Polygon.pointsAsCircle(center, radiusMeters)
+        circle.fillPaint.color = ContextCompat.getColor(this, R.color.transparent_light_green) // Buat warna transparan
+        circle.strokeColor = ContextCompat.getColor(this, R.color.transparent_dark_green)
+        circle.strokeWidth = 2f
+        circle.title = "Area Absen"
+
+        mapView.overlays.add(circle)
+        mapView.invalidate()
+    }
+
     /* -------------------- MAP helpers -------------------- */
     private fun updateMap(point: GeoPoint, title: String) {
         mapView.overlays.clear()
@@ -203,6 +290,20 @@ class ClockInActivity : AppCompatActivity() {
         if (geo == null) {
             Toast.makeText(this, "Lokasi belum tersedia", Toast.LENGTH_SHORT).show(); return
         }
+
+        if (centerLocation == null) {
+            Toast.makeText(this, "Lokasi pusat belum tersedia", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 👉 Validasi radius
+        if (!isWithinRadius(geo, centerLocation!!, allowedRadiusMeters)) {
+            Toast.makeText(this, "Kamu di luar radius absen (1 km)", Toast.LENGTH_LONG).show()
+            txtStatus.text = "Di Luar Area Absen"
+            txtStatus.setTextColor(Color.RED)
+            return
+        }
+
 
         val time = txtTime.text.toString()
         val date = dateFmt.format(Date())

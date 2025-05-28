@@ -32,20 +32,20 @@ class LoginActivity : AppCompatActivity() {
         }
 
         loginButton.setOnClickListener {
-            val username = usernameEditText.text.toString().trim()
+            val nisn = usernameEditText.text.toString().trim()
 //            val password = passwordEditText.text.toString().trim()
 
 //            if (username.isEmpty() || password.isEmpty()) {
-            if (username.isEmpty()) {
+            if (nisn.isEmpty()) {
                 Toast.makeText(this, "Username dan Password harus diisi", Toast.LENGTH_SHORT).show()
             } else {
 //                val user = userRepo.login(username, password)
-                val user = userRepo.login(username)
+                val user = userRepo.login(nisn)
                 if (user != null) {
                     // --- simpan di SharedPreferences ---
                     val pref = getSharedPreferences("UserData", MODE_PRIVATE)
                     with(pref.edit()) {
-                        putString("username", user.username)
+                        putString("nama", user.nama)
                         putString("nisJurusan", "${user.nis} - ${user.jurusan}")
                         apply()
                     }

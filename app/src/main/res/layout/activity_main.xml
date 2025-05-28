@@ -104,7 +104,7 @@
         android:background="@drawable/rounded_shadow"
         android:gravity="center_vertical"
         android:padding="12dp"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="12dp">
 
         <ImageView
             android:src="@drawable/description_24px"
@@ -112,6 +112,29 @@
             android:layout_height="24dp" />
         <TextView
             android:text="Laporan Harian"
+            android:layout_marginStart="16dp"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Penilaian Mitra -->
+    <LinearLayout
+        android:id="@+id/penilaian_mitra"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/rounded_shadow"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:src="@drawable/description_24px"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+        <TextView
+            android:text="Penilaian Mitra"
             android:layout_marginStart="16dp"
             android:textSize="18sp"
             android:textColor="@color/black"

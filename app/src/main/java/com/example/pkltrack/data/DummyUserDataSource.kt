@@ -6,14 +6,14 @@ class DummyUserDataSource : UserDataSource {
 
     /** daftar user dummy */
     private val users = listOf(
-        User("4444",  "1234", "27738749", "Teknik Ringan"),
-        User("0000",   "0000", "27738888", "RPL"),
-        User("1111",  "1111", "27739999", "TKJ")
+        User("4444",  "Admin", "27738749", "Teknik Baja Ringan"),
+        User("0000",   "Budi", "27738888", "Teknik Kerangka Jembatan"),
+        User("1111",  "Siti", "27739999", "Teknik Mesin Pesawat")
     )
 
 //    override fun login(username: String, password: String): User? =
 //        users.firstOrNull { it.username == username && it.password == password }
 
-    override fun login(username: String): User? =
-        users.firstOrNull { it.username == username }
+    override fun login(nisn: String): User? =
+        users.firstOrNull { it.nisn == nisn }
 }

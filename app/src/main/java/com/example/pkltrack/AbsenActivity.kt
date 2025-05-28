@@ -47,10 +47,10 @@ class AbsenActivity : AppCompatActivity() {
 
         //untuk membawa data ke header
         val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
-        val username   = pref.getString("username", "User")
+        val nama   = pref.getString("nama", "User")
         val nisJurusan = pref.getString("nisJurusan", "00000000 - Jurusan")
 
-        findViewById<TextView>(R.id.txtUser).text        = username
+        findViewById<TextView>(R.id.txtUser).text        = nama
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisJurusan
 
         btnClockInActivity.setOnClickListener {
