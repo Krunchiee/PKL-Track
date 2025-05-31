@@ -114,7 +114,7 @@ class DailyReportActivity : AppCompatActivity() {
             Toast.LENGTH_LONG
         ).show()
 
-        // TODO: panggil API upload di sini menggunakan Retrofit / Volley, dll.
+        // Taruh Disini: panggil API upload di sini menggunakan Retrofit / Volley, dll.
     }
 
     /* ---------- helper to get filename from Uri (optional) ---------- */
