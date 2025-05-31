@@ -8,11 +8,18 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.pkltrack.repository.UserRepository
+import com.example.pkltrack.network.ApiClient
+import com.example.pkltrack.network.ApiService
+import com.example.pkltrack.model.LoginResponse
+import com.example.pkltrack.model.LoginRequest
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+
+
 
 class LoginActivity : AppCompatActivity() {
-
-    private val userRepo = UserRepository()
 
     private fun toast(msg: String) =
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -33,28 +40,39 @@ class LoginActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             val nisn = usernameEditText.text.toString().trim()
-//            val password = passwordEditText.text.toString().trim()
 
-//            if (username.isEmpty() || password.isEmpty()) {
             if (nisn.isEmpty()) {
-                Toast.makeText(this, "Username dan Password harus diisi", Toast.LENGTH_SHORT).show()
+                toast("NISN harus diisi")
             } else {
-//                val user = userRepo.login(username, password)
-                val user = userRepo.login(nisn)
-                if (user != null) {
-                    // --- simpan di SharedPreferences ---
-                    val pref = getSharedPreferences("UserData", MODE_PRIVATE)
-                    with(pref.edit()) {
-                        putString("nama", user.nama)
-                        putString("nisJurusan", "${user.nis} - ${user.jurusan}")
-                        apply()
+                ApiClient.getInstance(this).loginSiswa(LoginRequest(nisn)).enqueue(object : Callback<LoginResponse> {
+                    override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                        if (response.isSuccessful) {
+                            val loginData = response.body()!!
+                            val siswa = loginData.user.siswa
+
+                            val pref = getSharedPreferences("UserData", MODE_PRIVATE)
+                            with(pref.edit()) {
+                                putString("token", loginData.token)
+                                putString("nama", siswa.nama)
+                                putString("nisn", siswa.nisn)
+                                putString("kelas", siswa.kelas)
+                                putString("foto", siswa.foto)
+                                putInt("id_siswa", siswa.id)
+                                apply()
+                            }
+
+                            toast("Login Berhasil")
+                            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                            finish()
+                        } else {
+                            toast("Login gagal: ${response.code()}")
+                        }
                     }
 
-                    toast("Login Berhasil")
-                    startActivity(Intent(this, MainActivity::class.java))
-                } else {
-                    toast("Username atau Password salah")
-                }
+                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                        toast("Terjadi kesalahan: ${t.message}")
+                    }
+                })
             }
         }
 

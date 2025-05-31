@@ -1,14 +1,17 @@
 package com.example.pkltrack
 
 import android.content.Intent
+import android.media.Image
 import android.os.Bundle
 import android.os.Handler
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 
@@ -73,10 +76,15 @@ class MainActivity : AppCompatActivity() {
         //untuk membawa data ke header
         val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
         val nama   = pref.getString("nama", "User")
-        val nisJurusan = pref.getString("nisJurusan", "00000000 - Jurusan")
+        val nisn = pref.getString("nisn", "00000000")
+        val kelas = pref.getString("kelas", "XI RPL 1")
+        val foto = pref.getString("foto", "foto user")
+        val id_siswa = pref.getInt("id_siswa", 2)
 
         findViewById<TextView>(R.id.txtUser).text        = nama
-        findViewById<TextView>(R.id.txtNISJurusan).text  = nisJurusan
+        findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
+        val profileImage = findViewById<ImageView>(R.id.profile_image)
+        Glide.with(this).load(foto).into(profileImage)
 
         absensi = findViewById(R.id.absensi)
         absensi.setOnClickListener {

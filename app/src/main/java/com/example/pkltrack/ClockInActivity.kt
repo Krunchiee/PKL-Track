@@ -21,8 +21,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.pkltrack.network.ApiClient
 import com.example.pkltrack.network.ApiService
-import com.example.pkltrack.network.ClockInRequest
-import com.example.pkltrack.network.ClockInResponse
+import com.example.pkltrack.model.ClockInRequest
+import com.example.pkltrack.model.ClockInResponse
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
@@ -101,7 +101,7 @@ class ClockInActivity : AppCompatActivity() {
         prefs = getSharedPreferences("ClockInPrefs", Context.MODE_PRIVATE)
 
         // ---- Retrofit ----
-        apiService = ApiClient.service
+//        apiService = ApiClient.service
         fetchCenterLocation()
 
         // ---- Map init ----
@@ -330,7 +330,7 @@ class ClockInActivity : AppCompatActivity() {
         txtStatus.text = "Sending…"
         lifecycleScope.launch {
             try {
-                val resp: ClockInResponse = withContext(Dispatchers.IO) { apiService.postClockIn(body) }
+//                val resp: ClockInResponse = withContext(Dispatchers.IO) { apiService.postClockIn(body) }
                 txtStatus.text = "Clocked In (Server)"
                 txtStatus.setTextColor(ContextCompat.getColor(this@ClockInActivity, R.color.light_green))
                 Toast.makeText(this@ClockInActivity, "Clock In berhasil di server", Toast.LENGTH_SHORT).show()
