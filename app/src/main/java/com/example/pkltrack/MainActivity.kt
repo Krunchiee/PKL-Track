@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pendaftaranpkl: LinearLayout
     private lateinit var absensi: LinearLayout
     private lateinit var laporanHarian: LinearLayout
+    private lateinit var penilaianMitra: LinearLayout
     private val slideInterval = 10000L // 3 seconds
 
     private val images = listOf(
@@ -80,6 +81,16 @@ class MainActivity : AppCompatActivity() {
         absensi = findViewById(R.id.absensi)
         absensi.setOnClickListener {
             startActivity(Intent(this, AbsenActivity::class.java))
+        }
+
+        laporanHarian = findViewById(R.id.laporan_harian)
+        laporanHarian.setOnClickListener {
+            startActivity(Intent(this, DailyReportActivity::class.java))
+        }
+
+        penilaianMitra = findViewById(R.id.penilaian_mitra)
+        penilaianMitra.setOnClickListener {
+            startActivity(Intent(this, CertificateActivity::class.java))
         }
     }
 

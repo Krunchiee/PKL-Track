@@ -63,14 +63,15 @@
         <ImageView
             android:src="@drawable/assignment_24px"
             android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_height="24dp"
+            android:tint="@color/white"/>
         <TextView
             android:text="Pendaftaran PKL"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:textSize="18sp"
-            android:textColor="@color/black" />
+            android:textColor="@color/white" />
     </LinearLayout>
 
     <!-- Absensi -->
@@ -86,14 +87,15 @@
         <ImageView
             android:src="@drawable/calendar_month_24px"
             android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_height="24dp"
+            android:tint="@color/white"/>
         <TextView
             android:text="Absensi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:textSize="18sp"
-            android:textColor="@color/black" />
+            android:textColor="@color/white" />
     </LinearLayout>
 
     <!-- Laporan Harian -->
@@ -109,12 +111,13 @@
         <ImageView
             android:src="@drawable/description_24px"
             android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_height="24dp"
+            android:tint="@color/white"/>
         <TextView
             android:text="Laporan Harian"
             android:layout_marginStart="16dp"
             android:textSize="18sp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
@@ -132,12 +135,13 @@
         <ImageView
             android:src="@drawable/description_24px"
             android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_height="24dp"
+            android:tint="@color/white"/>
         <TextView
             android:text="Penilaian Mitra"
             android:layout_marginStart="16dp"
             android:textSize="18sp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
