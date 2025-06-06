@@ -1,5 +1,7 @@
 package com.example.pkltrack.model
 
+import com.google.gson.annotations.SerializedName
+
 data class Attendance(
     val date: String,
     val clockIn: String,
@@ -27,12 +29,14 @@ data class AttendanceItem(
 
 
 data class ClockInRequest(
-    val latitude: Double,
-    val longitude: Double,
-    val date: String,
-    val time: String,
-    val note: String?
+    @SerializedName("id_siswa") val idSiswa: Int,
+    @SerializedName("tanggal") val tanggal: String,
+    @SerializedName("lat") val lat: Double,
+    @SerializedName("lng") val lng: Double,
+    @SerializedName("status") val status: String,
+    @SerializedName("keterangan") val keterangan: String
 )
+
 
 data class ClockInResponse(
     val success: Boolean,

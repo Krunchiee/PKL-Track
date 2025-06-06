@@ -53,7 +53,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class ClockInActivity : AppCompatActivity() {
+class ClockOutActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var prefs: SharedPreferences
@@ -90,7 +90,7 @@ class ClockInActivity : AppCompatActivity() {
         /*  OSMDroid requires context config before setContentView  */
         Configuration.getInstance().load(applicationContext, getSharedPreferences("osmdroid", MODE_PRIVATE))
 
-        setContentView(R.layout.activity_clock_in)
+        setContentView(R.layout.activity_clock_out)
 
         // ---- View binding ----
         mapView     = findViewById(R.id.mapView)
@@ -149,12 +149,12 @@ class ClockInActivity : AppCompatActivity() {
                     val data = response.body()?.data
                     centerLocation = GeoPoint(data?.lat?.toDouble() ?: 0.0, data?.lng?.toDouble() ?: 0.0)
                 } else {
-                    Toast.makeText(this@ClockInActivity, "Gagal mengambil pusat absen", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ClockOutActivity, "Gagal mengambil pusat absen", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<KoordinatResponse>, t: Throwable) {
-                Toast.makeText(this@ClockInActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ClockOutActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -308,7 +308,7 @@ class ClockInActivity : AppCompatActivity() {
         mapView.invalidate()
     }
 
-    /* -------------------- CLOCK IN -------------------- */
+    /* -------------------- CLOCK OUT -------------------- */
     private fun saveAndSendClockIn() {
         val geo = currentGeo
         if (geo == null) {
@@ -359,17 +359,17 @@ class ClockInActivity : AppCompatActivity() {
         ApiClient.getInstance(this).postClockIn(clockInRequest).enqueue(object : Callback<ClockInResponse> {
             override fun onResponse(call: Call<ClockInResponse>, response: Response<ClockInResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
-                    txtStatus.text = "Berhasil Clock In"
-                    txtStatus.setTextColor(ContextCompat.getColor(this@ClockInActivity, R.color.light_green))
-                    Toast.makeText(this@ClockInActivity, "Clock In berhasil", Toast.LENGTH_SHORT).show()
+                    txtStatus.text = "Berhasil Clock Out"
+                    txtStatus.setTextColor(ContextCompat.getColor(this@ClockOutActivity, R.color.light_green))
+                    Toast.makeText(this@ClockOutActivity, "Clock Out berhasil", Toast.LENGTH_SHORT).show()
                 } else {
-                    txtStatus.text = "Gagal Clock In"
+                    txtStatus.text = "Gagal Clock Out"
                 }
             }
 
             override fun onFailure(call: Call<ClockInResponse>, t: Throwable) {
-                txtStatus.text = "Error saat Clock In"
-                Toast.makeText(this@ClockInActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                txtStatus.text = "Error saat Clock Out"
+                Toast.makeText(this@ClockOutActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

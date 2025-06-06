@@ -29,6 +29,7 @@ class AbsenActivity : AppCompatActivity() {
     private lateinit var txtLiveDate: TextView
     private lateinit var recyclerHistory: RecyclerView
     private lateinit var btnClockInActivity: Button
+    private lateinit var btnClockOutActivity: Button
     private val handler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +40,7 @@ class AbsenActivity : AppCompatActivity() {
         txtLiveDate = findViewById(R.id.txtLiveDate)
         recyclerHistory = findViewById(R.id.recyclerHistory)
         btnClockInActivity= findViewById(R.id.btnClockIn)
+        btnClockOutActivity= findViewById(R.id.btnClockOut)
 
         // Tampilkan waktu dan tanggal sekarang
         updateTime()
@@ -64,6 +66,10 @@ class AbsenActivity : AppCompatActivity() {
         btnClockInActivity.setOnClickListener {
             startActivity(Intent(this, ClockInActivity::class.java))
         }
+
+        btnClockOutActivity.setOnClickListener {
+            startActivity(Intent(this, ClockOutActivity::class.java))
+        }
     }
 
     private fun getAttendanceFromAPI(idSiswa: Int) {
@@ -76,7 +82,7 @@ class AbsenActivity : AppCompatActivity() {
                         val attendanceData = response.body()?.data ?: emptyList()
 
                         val formattedList = attendanceData.map {
-                            val isLate = it.keterangan.contains("terlambat", ignoreCase = true)
+                            val isLate = it.status.contains("telat", ignoreCase = true)
                             Attendance(
                                 date = formatTanggalIndo(it.tanggal),
                                 clockIn = it.jam_masuk.substring(11, 16),
@@ -129,5 +135,13 @@ class AbsenActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
+        val idSiswa = pref.getInt("id_siswa", 0)
+
+        getAttendanceFromAPI(idSiswa)
     }
 }
