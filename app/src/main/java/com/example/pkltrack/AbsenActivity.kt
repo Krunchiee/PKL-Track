@@ -60,7 +60,8 @@ class AbsenActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtUser).text        = nama
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
         val profileImage = findViewById<ImageView>(R.id.profile_image)
-        Glide.with(this).load(foto).into(profileImage)
+        val fotoUrl = "https://pkltrack.my.id/storage/foto/${foto}"
+        Glide.with(this).load(fotoUrl).into(profileImage)
         getAttendanceFromAPI(idSiswa)
 
         btnClockInActivity.setOnClickListener {

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_form"
-        android:icon="@drawable/ic_id_card_24"
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/person_24px"
         android:title=""
         />
     <item
@@ -11,8 +11,8 @@
         android:title=""
         />
     <item
-        android:id="@+id/nav_profile"
-        android:icon="@drawable/person_24px"
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/logout"
         android:title=""
         />
 </menu>

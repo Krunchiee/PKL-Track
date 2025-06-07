@@ -12,8 +12,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
+import com.example.pkltrack.network.ApiClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
@@ -59,14 +66,13 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> true
-                R.id.nav_form -> {
-                    startActivity(Intent(this, WelcomeActivity::class.java))
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
                     overridePendingTransition(0, 0)
                     true
                 }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    overridePendingTransition(0, 0)
+                R.id.nav_logout -> {
+                    logoutUser()
                     true
                 }
                 else -> false
@@ -111,4 +117,36 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         handler.removeCallbacks(runnable)
     }
+
+    private fun logoutUser() {
+        val token = getSharedPreferences("UserData", MODE_PRIVATE).getString("token", "") ?: ""
+        if (token.isEmpty()) {
+            Toast.makeText(this, "Token tidak ditemukan", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        ApiClient.getInstance(this).logout("Bearer $token").enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    // Hapus session / SharedPreferences
+                    val editor = getSharedPreferences("UserData", MODE_PRIVATE).edit()
+                    editor.clear()
+                    editor.apply()
+
+                    // Redirect ke LoginActivity
+                    val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    Toast.makeText(this@MainActivity, "Berhasil logout", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "Gagal logout: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "Kesalahan jaringan: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 }

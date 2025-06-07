@@ -10,143 +10,157 @@
         android:id="@+id/include_header"
         layout="@layout/header" />
 
-    <!-- Banner / Slider -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/bannerContainer"
+    <ScrollView
+        android:id="@+id/scrollableContent"
         android:layout_below="@id/include_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        app:cardPreventCornerOverlap="false"
-        app:cardElevation="4dp"
-        app:cardBackgroundColor="@color/light_green">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/bannerSlider"
-                android:layout_width="match_parent"
-                android:layout_height="240dp"
-                />
-            <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
-                android:id="@+id/dotsIndicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Menu Cards -->
-    <LinearLayout
-        android:id="@+id/menuLayout"
-        android:layout_below="@id/bannerContainer"
         android:layout_above="@id/includeBottomNav"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-    <!-- Pendaftaran -->
-    <LinearLayout
-        android:id="@+id/pendaftaran_pkl"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@drawable/rounded_shadow"
-        android:gravity="center_vertical"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+                <!-- Banner / Slider -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/bannerContainer"
+                    android:layout_below="@id/include_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/light_green">
 
-        <ImageView
-            android:src="@drawable/assignment_24px"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:tint="@color/white"/>
-        <TextView
-            android:text="Pendaftaran PKL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:textSize="18sp"
-            android:textColor="@color/white" />
-    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+                        <androidx.viewpager2.widget.ViewPager2
+                            android:id="@+id/bannerSlider"
+                            android:layout_width="match_parent"
+                            android:layout_height="160dp"
+                            />
+                        <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+                            android:id="@+id/dotsIndicator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
-    <!-- Absensi -->
-    <LinearLayout
-        android:id="@+id/absensi"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@drawable/rounded_shadow"
-        android:gravity="center_vertical"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+                <!-- Menu Cards -->
+                <LinearLayout
+                    android:id="@+id/menuLayout"
+                    android:layout_below="@id/bannerContainer"
+                    android:layout_above="@id/includeBottomNav"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <ImageView
-            android:src="@drawable/calendar_month_24px"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:tint="@color/white"/>
-        <TextView
-            android:text="Absensi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:textSize="18sp"
-            android:textColor="@color/white" />
-    </LinearLayout>
+                <!-- Pendaftaran -->
+                <LinearLayout
+                    android:id="@+id/pendaftaran_pkl"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:background="@drawable/rounded_shadow"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:layout_marginBottom="12dp">
 
-    <!-- Laporan Harian -->
-    <LinearLayout
-        android:id="@+id/laporan_harian"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@drawable/rounded_shadow"
-        android:gravity="center_vertical"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+                    <ImageView
+                        android:src="@drawable/assignment_24px"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:tint="@color/white"/>
+                    <TextView
+                        android:text="Pendaftaran PKL"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+                </LinearLayout>
 
-        <ImageView
-            android:src="@drawable/description_24px"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:tint="@color/white"/>
-        <TextView
-            android:text="Laporan Harian"
-            android:layout_marginStart="16dp"
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+                <!-- Absensi -->
+                <LinearLayout
+                    android:id="@+id/absensi"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:background="@drawable/rounded_shadow"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:layout_marginBottom="12dp">
 
-    <!-- Penilaian Mitra -->
-    <LinearLayout
-        android:id="@+id/penilaian_mitra"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@drawable/rounded_shadow"
-        android:gravity="center_vertical"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+                    <ImageView
+                        android:src="@drawable/calendar_month_24px"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:tint="@color/white"/>
+                    <TextView
+                        android:text="Absensi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+                </LinearLayout>
 
-        <ImageView
-            android:src="@drawable/description_24px"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:tint="@color/white"/>
-        <TextView
-            android:text="Penilaian Mitra"
-            android:layout_marginStart="16dp"
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-</LinearLayout>
+                <!-- Laporan Harian -->
+                <LinearLayout
+                    android:id="@+id/laporan_harian"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:background="@drawable/rounded_shadow"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:layout_marginBottom="12dp">
 
+                    <ImageView
+                        android:src="@drawable/description_24px"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:tint="@color/white"/>
+                    <TextView
+                        android:text="Laporan Harian"
+                        android:layout_marginStart="16dp"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <!-- Penilaian Mitra -->
+                <LinearLayout
+                    android:id="@+id/penilaian_mitra"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:background="@drawable/rounded_shadow"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:src="@drawable/description_24px"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:tint="@color/white"/>
+                    <TextView
+                        android:text="Penilaian Mitra"
+                        android:layout_marginStart="16dp"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
     <!-- Bottom Navigation -->
     <include
         android:id="@+id/includeBottomNav"
