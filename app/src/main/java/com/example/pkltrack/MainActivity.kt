@@ -80,17 +80,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         //untuk membawa data ke header
-        val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
-        val nama   = pref.getString("nama", "User")
-        val nisn = pref.getString("nisn", "00000000")
-        val kelas = pref.getString("kelas", "XI RPL 1")
-        val foto = pref.getString("foto", "foto user")
-        val id_siswa = pref.getInt("id_siswa", 2)
+        val pref = getSharedPreferences("UserData", MODE_PRIVATE)
+        val nama = pref.getString("nama", "User") ?: "User"
+        val nisn = pref.getString("nisn", "-") ?: "-"
+        val kelas = pref.getString("kelas", "-") ?: "-"
+        val foto = pref.getString("foto", "")
+        val idSiswa = pref.getInt("id_siswa", -1)
 
         findViewById<TextView>(R.id.txtUser).text        = nama
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
         val profileImage = findViewById<ImageView>(R.id.profile_image)
-        Glide.with(this).load(foto).into(profileImage)
+
+        if (!foto.isNullOrEmpty()) {
+            Glide.with(this).load(foto).into(profileImage)
+        }
 
         absensi = findViewById(R.id.absensi)
         absensi.setOnClickListener {

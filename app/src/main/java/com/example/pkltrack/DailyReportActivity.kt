@@ -6,10 +6,23 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.*
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
+import com.bumptech.glide.Glide
+import com.example.pkltrack.model.DailyReportResponse
+import com.example.pkltrack.network.ApiClient
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
 
 class DailyReportActivity : AppCompatActivity() {
 
@@ -23,10 +36,8 @@ class DailyReportActivity : AppCompatActivity() {
 
     /* ---------- runtime permission helpers ---------- */
 
-    /** true if we already have permission to read images */
     private fun hasReadImagePerm(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+: READ_MEDIA_IMAGES
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_MEDIA_IMAGES
@@ -39,7 +50,6 @@ class DailyReportActivity : AppCompatActivity() {
         }
     }
 
-    /** permission launcher */
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) pickImageLauncher.launch("image/*")
@@ -52,7 +62,7 @@ class DailyReportActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 selectedUri = it
-                imgPlaceholder.setImageURI(it)          // preview
+                imgPlaceholder.setImageURI(it)
             }
         }
 
@@ -60,26 +70,32 @@ class DailyReportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_daily_report)
 
         //untuk membawa data ke header
-        val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
-        val nama   = pref.getString("nama", "User")
-        val nisJurusan = pref.getString("nisJurusan", "00000000 - Jurusan")
+        val pref = getSharedPreferences("UserData", MODE_PRIVATE)
+        val nama = pref.getString("nama", "User") ?: "User"
+        val nisn = pref.getString("nisn", "-") ?: "-"
+        val kelas = pref.getString("kelas", "-") ?: "-"
+        val foto = pref.getString("foto", "")
+        val idSiswa = pref.getInt("id_siswa", -1)
 
         findViewById<TextView>(R.id.txtUser).text        = nama
-        findViewById<TextView>(R.id.txtNISJurusan).text  = nisJurusan
+        findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
+        val profileImage = findViewById<ImageView>(R.id.profile_image)
 
-        // find views
+        if (!foto.isNullOrEmpty()) {
+            Glide.with(this).load(foto).into(profileImage)
+        }
+
         imgPlaceholder = findViewById(R.id.imagePlaceholder)
         edtDescription = findViewById(R.id.editDescription)
         btnKirim = findViewById(R.id.btnKirim)
 
-        // pick image when placeholder clicked
         imgPlaceholder.setOnClickListener {
             if (hasReadImagePerm()) pickImageLauncher.launch("image/*")
             else {
-                // request proper permission depending on API level
                 val perm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     Manifest.permission.READ_MEDIA_IMAGES
                 else
@@ -88,7 +104,6 @@ class DailyReportActivity : AppCompatActivity() {
             }
         }
 
-        // send data
         btnKirim.setOnClickListener { performSubmit() }
     }
 
@@ -106,18 +121,40 @@ class DailyReportActivity : AppCompatActivity() {
             return
         }
 
-        // 👉 convert Uri to file-path or multipart as needed
-        // (contoh sederhana: hanya menampilkan Toast)
-        Toast.makeText(
-            this,
-            "Gambar: ${getFileName(selectedUri!!)}\nDeskripsi: $description",
-            Toast.LENGTH_LONG
-        ).show()
+        val realPath = getPathFromUri(selectedUri!!)
+        if (realPath == null) {
+            Toast.makeText(this, "Gagal mengambil path gambar!", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // Taruh Disini: panggil API upload di sini menggunakan Retrofit / Volley, dll.
+        val file = File(realPath)
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        val imagePart = MultipartBody.Part.createFormData("gambar", file.name, requestFile)
+        val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val pref = getSharedPreferences("UserData", MODE_PRIVATE)
+        val idSiswa = pref.getInt("id_siswa", -1)
+
+        ApiClient.getInstance(this).uploadLaporan(idSiswa= idSiswa, photo = imagePart, keterangan = descriptionPart).enqueue(object : Callback<DailyReportResponse> {
+            override fun onResponse(
+                call: Call<DailyReportResponse>,
+                response: Response<DailyReportResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@DailyReportActivity, "Laporan berhasil dikirim!", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this@DailyReportActivity, "Gagal mengirim laporan!", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<DailyReportResponse>, t: Throwable) {
+                Toast.makeText(this@DailyReportActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
-    /* ---------- helper to get filename from Uri (optional) ---------- */
+    /* ---------- helper: get filename (opsional) ---------- */
     private fun getFileName(uri: Uri): String {
         val projection = arrayOf(MediaStore.Images.Media.DISPLAY_NAME)
         contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
@@ -127,4 +164,16 @@ class DailyReportActivity : AppCompatActivity() {
         }
         return uri.lastPathSegment ?: "image.jpg"
     }
+
+    /* ---------- helper: get path from Uri ---------- */
+    private fun getPathFromUri(uri: Uri): String? {
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+        return cursor?.use {
+            val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            it.moveToFirst()
+            it.getString(columnIndex)
+        }
+    }
+
 }

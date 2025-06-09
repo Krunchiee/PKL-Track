@@ -47,7 +47,7 @@
             <ImageView
                 android:id="@+id/imagePlaceholder"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="140dp"
                 android:background="#E0E0E0"
                 android:contentDescription="Upload Icon"
                 android:padding="40dp"

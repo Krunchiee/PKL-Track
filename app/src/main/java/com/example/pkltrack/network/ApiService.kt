@@ -7,6 +7,8 @@ import com.example.pkltrack.model.AttendanceRequest
 import com.example.pkltrack.model.ClockInRequest
 import com.example.pkltrack.model.KoordinatResponse
 import com.example.pkltrack.model.ClockInResponse
+import com.example.pkltrack.model.DailyReportResponse
+import com.example.pkltrack.model.PenilaianResponse
 import com.example.pkltrack.model.ProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -55,5 +57,16 @@ interface ApiService {
     fun logout(
         @Header("Authorization") token: String
     ): Call<Void>
+
+    @GET("siswa/penilaian/{id}")
+    fun getPenilaian(@Path("id") id: Int): Call<PenilaianResponse>
+
+    @Multipart
+    @POST("siswa/laporan")
+    fun uploadLaporan(
+        @Part("id_siswa") idSiswa: Int,
+        @Part("keterangan") keterangan: RequestBody,
+        @Part photo: MultipartBody.Part
+    ): Call<DailyReportResponse>
 }
 
