@@ -22,6 +22,7 @@ import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 
 interface ApiService {
@@ -44,14 +45,10 @@ interface ApiService {
     @POST("siswa/update/{id}")
     fun updateProfile(
         @Path("id") id: Int,
-        @Header("Authorization") token: String,
-        @Part("nisn") nisn: RequestBody,
-        @Part("nama") nama: RequestBody,
-        @Part("kelas") kelas: RequestBody,
-        @Part("alamat") alamat: RequestBody,
-        @Part("no_hp") no_hp: RequestBody,
+        @PartMap partMap: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part foto: MultipartBody.Part?
-    ): Call<ProfileResponse>
+    ): Call<ResponseBody>
+
 
     @POST("logout")
     fun logout(

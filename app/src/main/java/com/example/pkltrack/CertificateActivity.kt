@@ -78,15 +78,15 @@ class CertificateActivity : AppCompatActivity() {
         ApiClient.getInstance(this).getPenilaian(idSiswa).enqueue(object : Callback<PenilaianResponse> {
             override fun onResponse(call: Call<PenilaianResponse>, response: Response<PenilaianResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
-                    val penilaian = response.body()?.data
+                    val pengajuan = response.body()?.data?.pengajuan
 
-                    txtScore.text = penilaian?.nilai?.toString() ?: "-"
-                    txtDescription.text = penilaian?.catatan?.ifEmpty { "-" } ?: "-"
+                    txtScore.text = pengajuan?.nilai_kompetensi ?: "-"
+                    txtDescription.text = pengajuan?.catatan?.ifEmpty { "-" } ?: "-"
 
-                    val tanggal = penilaian?.updated_at ?: penilaian?.created_at ?: ""
+                    val tanggal = pengajuan?.updated_at ?: pengajuan?.created_at ?: ""
                     txtDate.text = formatTanggalIndo(tanggal)
 
-                    sertifikatUrl = penilaian?.sertifikat
+                    sertifikatUrl = pengajuan?.sertifikat
 
                 } else {
                     Toast.makeText(this@CertificateActivity, "Gagal memuat data", Toast.LENGTH_SHORT).show()
@@ -99,12 +99,27 @@ class CertificateActivity : AppCompatActivity() {
         })
     }
 
+
     private fun downloadCertificateImage(imageUrl: String) {
-        val request = DownloadManager.Request(Uri.parse(imageUrl))
+        val uri = Uri.parse(imageUrl)
+
+        // Ekstrak ekstensi file dari URL, misalnya .pdf atau .jpg
+        val fileExtension = when {
+            imageUrl.endsWith(".pdf", ignoreCase = true) -> ".pdf"
+            imageUrl.endsWith(".png", ignoreCase = true) -> ".png"
+            imageUrl.endsWith(".jpeg", ignoreCase = true) -> ".jpeg"
+            imageUrl.endsWith(".jpg", ignoreCase = true) -> ".jpg"
+            else -> ".pdf" // fallback default
+        }
+
+        // Nama file yang akan disimpan
+        val fileName = "sertifikat_pkl$fileExtension"
+
+        val request = DownloadManager.Request(uri)
             .setTitle("Sertifikat PKL")
             .setDescription("Sedang mendownload sertifikat...")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "sertifikat_pkl.jpg")
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
             .setAllowedOverMetered(true)
             .setAllowedOverRoaming(true)
 
@@ -113,6 +128,7 @@ class CertificateActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Download dimulai...", Toast.LENGTH_SHORT).show()
     }
+
 
     private fun formatTanggalIndo(tanggal: String): String {
         return try {

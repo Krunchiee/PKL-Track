@@ -83,11 +83,14 @@ class AbsenActivity : AppCompatActivity() {
                         val attendanceData = response.body()?.data ?: emptyList()
 
                         val formattedList = attendanceData.map {
-                            val isLate = it.status.contains("telat", ignoreCase = true)
+                            val isLate = it.status?.contains("telat", ignoreCase = true) == true
+                            val clockIn = it.jam_masuk?.substring(11, 16) ?: ""
+                            val clockOut = it.jam_keluar?.substring(11, 16) ?: ""
+
                             Attendance(
                                 date = formatTanggalIndo(it.tanggal),
-                                clockIn = it.jam_masuk.substring(11, 16),
-                                clockOut = it.jam_keluar.substring(11, 16),
+                                clockIn = clockIn,
+                                clockOut = clockOut,
                                 isLate = isLate
                             )
                         }

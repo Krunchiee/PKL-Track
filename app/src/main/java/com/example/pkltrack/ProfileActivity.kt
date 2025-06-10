@@ -5,18 +5,23 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.pkltrack.model.ProfileResponse
 import com.example.pkltrack.network.ApiClient
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import okhttp3.ResponseBody
 import java.io.File
 
 class ProfileActivity : AppCompatActivity() {
@@ -49,16 +54,13 @@ class ProfileActivity : AppCompatActivity() {
         edtNoHp = findViewById(R.id.editNoHp)
         btnSimpan = findViewById(R.id.btnSimpan)
 
-        // Ambil data dari API
         loadProfile()
 
-        // Pilih gambar dari galeri
         imgFoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, PICK_IMAGE_REQUEST)
         }
 
-        // Tombol simpan
         btnSimpan.setOnClickListener {
             updateProfile()
         }
@@ -74,26 +76,33 @@ class ProfileActivity : AppCompatActivity() {
         ApiClient.getInstance(this).getProfile("Bearer $token").enqueue(object : Callback<ProfileResponse> {
             override fun onResponse(call: Call<ProfileResponse>, response: Response<ProfileResponse>) {
                 if (response.isSuccessful) {
-                    val user = response.body()!!
-                    val siswa = user.siswa
+                    val profile = response.body()
+                    val siswa = profile?.siswa
 
-                    siswaId = siswa.id
-                    edtNama.setText(siswa.nama)
-                    edtNISN.setText(siswa.nisn)
-                    edtKelas.setText(siswa.kelas)
-                    edtAlamat.setText(siswa.alamat)
-                    edtNoHp.setText(siswa.no_hp)
+                    if (siswa != null) {
+                        // Fill your UI
+                        edtNama.setText(siswa.nama)
+                        edtNISN.setText(siswa.nisn)
+                        edtKelas.setText(siswa.kelas.trim()) // trim to remove tabs
+                        edtAlamat.setText(siswa.alamat)
+                        edtNoHp.setText(siswa.no_hp)
 
-                        val fotoUrl = "https://pkltrack.my.id/storage/foto/${siswa.foto}"
-                    Glide.with(this@ProfileActivity)
-                        .load(fotoUrl)
-                        .into(imgFoto)
+                        // Save ID for update
+                        siswaId = siswa.id
 
-
+                        // Load photo
+                        val fotoUrl = "https://pkltrack.my.id/uploads/siswa/${siswa.foto}"
+                        Glide.with(this@ProfileActivity)
+                            .load(fotoUrl)
+                            .into(imgFoto)
+                    } else {
+                        Toast.makeText(this@ProfileActivity, "Data Siswa Kosong", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Toast.makeText(this@ProfileActivity, "Gagal memuat data", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ProfileActivity, "Gagal memuat profil", Toast.LENGTH_SHORT).show()
                 }
             }
+
 
             override fun onFailure(call: Call<ProfileResponse>, t: Throwable) {
                 Toast.makeText(this@ProfileActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
@@ -102,45 +111,46 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateProfile() {
-        val token = getSharedPreferences("UserData", MODE_PRIVATE).getString("token", null) ?: return
-
         val nama = edtNama.text.toString()
         val nisn = edtNISN.text.toString()
         val kelas = edtKelas.text.toString()
         val alamat = edtAlamat.text.toString()
         val noHp = edtNoHp.text.toString()
 
-        val namaPart = RequestBody.create("text/plain".toMediaTypeOrNull(), nama)
-        val nisnPart = RequestBody.create("text/plain".toMediaTypeOrNull(), nisn)
-        val kelasPart = RequestBody.create("text/plain".toMediaTypeOrNull(), kelas)
-        val alamatPart = RequestBody.create("text/plain".toMediaTypeOrNull(), alamat)
-        val noHpPart = RequestBody.create("text/plain".toMediaTypeOrNull(), noHp)
+        // Buat part map
+        val map = HashMap<String, RequestBody>().apply {
+            put("nama", nama.toRequestBody("text/plain".toMediaType()))
+            put("nisn", nisn.toRequestBody("text/plain".toMediaType()))
+            put("kelas", kelas.toRequestBody("text/plain".toMediaType()))
+            put("alamat", alamat.toRequestBody("text/plain".toMediaType()))
+            put("no_hp", noHp.toRequestBody("text/plain".toMediaType()))
+        }
 
-        val fotoPart: MultipartBody.Part? = selectedImageFile?.let {
-            val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), it)
+        // Buat part foto jika tersedia
+        val fotoPart = selectedImageFile?.let {
+            val requestFile = it.asRequestBody("image/*".toMediaTypeOrNull())
             MultipartBody.Part.createFormData("foto", it.name, requestFile)
         }
 
-
         ApiClient.getInstance(this).updateProfile(
             id = siswaId,
-            token = "Bearer $token",
-            nisn = nisnPart,
-            nama = namaPart,
-            kelas = kelasPart,
-            alamat = alamatPart,
-            no_hp = noHpPart,
+            partMap = map,
             foto = fotoPart
-        ).enqueue(object : Callback<ProfileResponse> {
-            override fun onResponse(call: Call<ProfileResponse>, response: Response<ProfileResponse>) {
+        ).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
+                    val result = response.body()?.string()
+                    Log.d("UPDATE_SUCCESS", "Body: $result")
                     Toast.makeText(this@ProfileActivity, "Profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
                 } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("UPDATE_FAILED", "Error Body: $errorBody")
                     Toast.makeText(this@ProfileActivity, "Gagal memperbarui profil", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<ProfileResponse>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("API_RESPONSE", "Kesalahan jaringan: ${t.message}")
                 Toast.makeText(this@ProfileActivity, "Kesalahan jaringan: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -152,13 +162,15 @@ class ProfileActivity : AppCompatActivity() {
             selectedImageUri = data.data!!
             imgFoto.setImageURI(selectedImageUri)
 
-            val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
-            val cursor = contentResolver.query(selectedImageUri, filePathColumn, null, null, null)
-            cursor?.moveToFirst()
-            val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
-            val picturePath = columnIndex?.let { cursor.getString(it) }
-            selectedImageFile = File(picturePath ?: "")
-            cursor?.close()
+            val inputStream = contentResolver.openInputStream(selectedImageUri)
+            val file = File(cacheDir, "selected_image.jpg")
+            inputStream?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            selectedImageFile = file
+
         }
     }
 }
