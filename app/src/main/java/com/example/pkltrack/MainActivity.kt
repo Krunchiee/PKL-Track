@@ -95,6 +95,11 @@ class MainActivity : AppCompatActivity() {
             Glide.with(this).load(foto).into(profileImage)
         }
 
+        pendaftaranpkl = findViewById(R.id.pendaftaran_pkl)
+        pendaftaranpkl.setOnClickListener {
+            startActivity(Intent(this, AvailableMitraActivity::class.java))
+        }
+
         absensi = findViewById(R.id.absensi)
         absensi.setOnClickListener {
             startActivity(Intent(this, AbsenActivity::class.java))

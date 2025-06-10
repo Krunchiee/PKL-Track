@@ -8,6 +8,7 @@ import com.example.pkltrack.model.ClockInRequest
 import com.example.pkltrack.model.KoordinatResponse
 import com.example.pkltrack.model.ClockInResponse
 import com.example.pkltrack.model.DailyReportResponse
+import com.example.pkltrack.model.MitraResponse
 import com.example.pkltrack.model.PenilaianResponse
 import com.example.pkltrack.model.ProfileResponse
 import okhttp3.MultipartBody
@@ -63,7 +64,10 @@ interface ApiService {
     fun uploadLaporan(
         @Part("id_siswa") idSiswa: Int,
         @Part("keterangan") keterangan: RequestBody,
-        @Part photo: MultipartBody.Part
-    ): Call<DailyReportResponse>
+        @Part photo: MultipartBody.Part?
+    ): Call<ResponseBody>
+
+    @GET("siswa/mitra/available")
+    fun getAvailableMitra(): Call<MitraResponse>
 }
 

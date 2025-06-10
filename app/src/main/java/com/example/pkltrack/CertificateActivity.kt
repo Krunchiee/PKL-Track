@@ -89,7 +89,12 @@ class CertificateActivity : AppCompatActivity() {
                     sertifikatUrl = pengajuan?.sertifikat
 
                 } else {
-                    Toast.makeText(this@CertificateActivity, "Gagal memuat data", Toast.LENGTH_SHORT).show()
+                    txtScore.text = "-"
+                    txtDescription.text ="-"
+                    txtDate.text = ""
+
+                    sertifikatUrl = null
+                    Toast.makeText(this@CertificateActivity, "Belum Ada Penilaian", Toast.LENGTH_SHORT).show()
                 }
             }
 
