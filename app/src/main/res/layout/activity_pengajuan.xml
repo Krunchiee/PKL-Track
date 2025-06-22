@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#D7F52C">
+    android:background="@drawable/background2">
 
     <!-- Header -->
     <include
@@ -85,19 +85,22 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textColor="#999999"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
 
                         <Button
                             android:id="@+id/btnUploadCV"
-                            android:text="Choose File"
+                            android:text="Pilih File"
                             android:layout_width="wrap_content"
-                            android:layout_height="32dp"
-                            android:background="@drawable/button_secondary_background"
-                            android:textColor="#666666"
-                            android:textSize="12sp"
+                            android:layout_height="36dp"
+                            android:backgroundTint="@android:color/holo_green_light"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
                             android:textAllCaps="false"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp" />
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:layout_marginStart="8dp" />
                     </LinearLayout>
 
                     <!-- Submit Button -->
@@ -106,10 +109,10 @@
                         android:text="Kirim"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:background="@drawable/button_primary_background"
-                        android:textColor="#333333"
                         android:textStyle="bold"
                         android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:backgroundTint="@android:color/holo_green_light"
                         android:textAllCaps="false" />
 
                 </LinearLayout>

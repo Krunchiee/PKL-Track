@@ -23,16 +23,17 @@ class MitraDetailActivity : AppCompatActivity() {
         val keterangan = intent.getStringExtra("keterangan")
 
         val txtNamaMitra = findViewById<TextView>(R.id.txtNamaMitra)
-        val txtDetail = findViewById<TextView>(R.id.txtDetail)
+        val txtLokasi = findViewById<TextView>(R.id.txtLokasi)
+        val txtJumlahLowongan = findViewById<TextView>(R.id.txtJumlahLowongan)
+        val txtKriteria = findViewById<TextView>(R.id.txtKriteria)
+        val txtPersyaratan = findViewById<TextView>(R.id.txtPersyaratan)
         val idMitra = intent.getIntExtra("id_mitra", 0)
 
-        txtNamaMitra.text = nama
-        txtDetail.text = """
-            • Lokasi: $alamat
-            • Jumlah Lowongan: $lowongan
-            • Kriteria: $keterangan
-            • Persyaratan: -
-        """.trimIndent()
+        txtNamaMitra.text = nama ?: "Nama tidak tersedia"
+        txtLokasi.text = "Alamat: ${alamat ?: "Tidak tersedia"}"
+        txtJumlahLowongan.text = "Jumlah Lowongan: ${lowongan ?: "Tidak tersedia"}"
+        txtKriteria.text = "Kriteria: ${keterangan ?: "Tidak tersedia"}"
+        txtPersyaratan.text = "Persyaratan: -"
 
         val btnAjukan = findViewById<Button>(R.id.btnAjukan)
         btnAjukan.setOnClickListener {

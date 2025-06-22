@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Profile Picture -->
+    <ImageView
+        android:id="@+id/profile_image"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_user_24"
+        android:background="@drawable/circle_background"
+        android:scaleType="centerCrop"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp" />
+
+    <!-- User Info -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_toEndOf="@id/profile_image"
+        android:layout_marginStart="12dp"
+        android:layout_alignTop="@id/profile_image">
+
+        <TextView
+            android:id="@+id/txtUser"
+            android:text="user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/txtNISJurusan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="27738749 - Jurusan teknik ringan"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Bell Icon -->
+<!--    <ImageView-->
+<!--        android:id="@+id/btnNotification"-->
+<!--        android:layout_width="24dp"-->
+<!--        android:layout_height="24dp"-->
+<!--        android:src="@drawable/notifications_24px"-->
+<!--        android:background="@drawable/circle_background"-->
+<!--        android:layout_alignParentEnd="true"-->
+<!--        android:layout_alignTop="@id/profile_image"-->
+<!--        android:layout_marginTop="8dp" />-->
+</RelativeLayout>
