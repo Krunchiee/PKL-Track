@@ -9,6 +9,9 @@ import com.example.pkltrack.model.KoordinatResponse
 import com.example.pkltrack.model.ClockInResponse
 import com.example.pkltrack.model.DailyReportResponse
 import com.example.pkltrack.model.MitraResponse
+import com.example.pkltrack.model.JurusanListResponse
+import com.example.pkltrack.model.PengajuanResponse
+import com.example.pkltrack.model.PengajuanInfoResponse
 import com.example.pkltrack.model.PenilaianResponse
 import com.example.pkltrack.model.ProfileResponse
 import okhttp3.MultipartBody
@@ -32,8 +35,10 @@ interface ApiService {
 
     @POST("absen/history")
     fun getAbsensi(@Body request: AttendanceRequest): Call<AttendanceResponse>
+
     @POST("absen/koordinat")
     fun getKoordinat(@Body request: Map<String, Int>): Call<KoordinatResponse>
+
     @POST("absen/store")
     fun postClockIn(
         @Body body: ClockInRequest
@@ -49,7 +54,6 @@ interface ApiService {
         @PartMap partMap: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part foto: MultipartBody.Part?
     ): Call<ResponseBody>
-
 
     @POST("logout")
     fun logout(
@@ -69,5 +73,26 @@ interface ApiService {
 
     @GET("siswa/mitra/available")
     fun getAvailableMitra(): Call<MitraResponse>
+
+    @Multipart
+    @POST("siswa/pengajuan-awal")
+    fun submitPengajuan(
+        @Header("Authorization") token: String,
+        @Part("id_siswa") idSiswa: RequestBody,
+        @Part("id_mitra") idMitra: RequestBody,
+        @Part berkasCV: MultipartBody.Part
+    ): Call<PengajuanResponse>
+
+    @GET("siswa/list-jurusan")
+    fun getListJurusan(
+        @Header("Authorization") token: String
+    ): Call<JurusanListResponse>
+
+    @GET("siswa/cek-pengajuan/{id}")
+    fun cekPengajuanSiswa(
+        @Header("Authorization") token: String,
+        @Path("id") idSiswa: Int
+    ): Call<PengajuanInfoResponse>
+
 }
 

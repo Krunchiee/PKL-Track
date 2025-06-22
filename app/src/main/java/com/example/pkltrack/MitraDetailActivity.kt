@@ -1,5 +1,6 @@
 package com.example.pkltrack
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -8,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.pkltrack.PengajuanActivity
 
 class MitraDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +24,7 @@ class MitraDetailActivity : AppCompatActivity() {
 
         val txtNamaMitra = findViewById<TextView>(R.id.txtNamaMitra)
         val txtDetail = findViewById<TextView>(R.id.txtDetail)
+        val idMitra = intent.getIntExtra("id_mitra", 0)
 
         txtNamaMitra.text = nama
         txtDetail.text = """
@@ -33,7 +36,9 @@ class MitraDetailActivity : AppCompatActivity() {
 
         val btnAjukan = findViewById<Button>(R.id.btnAjukan)
         btnAjukan.setOnClickListener {
-            Toast.makeText(this, "Pengajuan dikirim", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, PengajuanActivity::class.java)
+            intent.putExtra("id_mitra", idMitra)
+            startActivity(intent)
         }
     }
 }
