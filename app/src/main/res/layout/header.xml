@@ -23,7 +23,8 @@
         android:orientation="vertical"
         android:layout_toEndOf="@id/profile_image"
         android:layout_marginStart="12dp"
-        android:layout_alignTop="@id/profile_image">
+        android:layout_alignTop="@id/profile_image"
+        android:layout_marginTop="5dp">
 
         <TextView
             android:id="@+id/txtUser"

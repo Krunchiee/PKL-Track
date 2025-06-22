@@ -25,7 +25,7 @@ class AvailableMitraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContentView(R.layout.activity_available_mitra)
 
         recyclerView = findViewById(R.id.recyclerMitra)

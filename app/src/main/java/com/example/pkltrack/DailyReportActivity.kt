@@ -61,7 +61,7 @@ class DailyReportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContentView(R.layout.activity_daily_report)
 
         val pref = getSharedPreferences("UserData", MODE_PRIVATE)

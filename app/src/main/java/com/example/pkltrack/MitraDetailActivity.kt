@@ -14,7 +14,7 @@ import com.example.pkltrack.PengajuanActivity
 class MitraDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContentView(R.layout.activity_mitra_detail)
 
         val nama = intent.getStringExtra("nama")
