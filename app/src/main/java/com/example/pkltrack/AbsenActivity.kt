@@ -1,6 +1,7 @@
 package com.example.pkltrack
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.widget.Button
@@ -20,6 +21,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -73,8 +75,41 @@ class AbsenActivity : AppCompatActivity() {
         }
     }
 
-    private fun getAttendanceFromAPI(idSiswa: Int) {
+//    private fun getAttendanceFromAPI(idSiswa: Int) {
+//
+//        val request = AttendanceRequest(idSiswa)
+//        ApiClient.getInstance(this).getAbsensi(request)
+//            .enqueue(object : Callback<AttendanceResponse> {
+//                override fun onResponse(call: Call<AttendanceResponse>, response: Response<AttendanceResponse>) {
+//                    if (response.isSuccessful && response.body()?.success == true) {
+//                        val attendanceData = response.body()?.data ?: emptyList()
+//
+//                        val formattedList = attendanceData.map {
+//                            val isLate = it.status?.contains("telat", ignoreCase = true) == true
+//                            val clockIn = it.jam_masuk?.substring(11, 16) ?: ""
+//                            val clockOut = it.jam_keluar?.substring(11, 16) ?: ""
+//
+//                            Attendance(
+//                                date = formatTanggalIndo(it.tanggal),
+//                                clockIn = clockIn,
+//                                clockOut = clockOut,
+//                                isLate = isLate
+//                            )
+//                        }
+//
+//                        recyclerHistory.adapter = AttendanceAdapter(formattedList)
+//                    } else {
+//                        Toast.makeText(this@AbsenActivity, "Gagal mengambil data", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//
+//                override fun onFailure(call: Call<AttendanceResponse>, t: Throwable) {
+//                    Toast.makeText(this@AbsenActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+//                }
+//            })
+//    }
 
+    private fun getAttendanceFromAPI(idSiswa: Int) {
         val request = AttendanceRequest(idSiswa)
         ApiClient.getInstance(this).getAbsensi(request)
             .enqueue(object : Callback<AttendanceResponse> {
@@ -82,6 +117,33 @@ class AbsenActivity : AppCompatActivity() {
                     if (response.isSuccessful && response.body()?.success == true) {
                         val attendanceData = response.body()?.data ?: emptyList()
 
+                        // 🔹 Cek waktu sekarang dari device
+                        val calendarNow = Calendar.getInstance()
+                        val hour = calendarNow.get(Calendar.HOUR_OF_DAY)
+                        val minute = calendarNow.get(Calendar.MINUTE)
+                        val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendarNow.time)
+
+                        // 🔹 Aturan 1: Berdasarkan jam sekarang
+                        if (hour > 7 || (hour == 7 && minute > 15)) {
+                            disableButton(btnClockInActivity)
+                        }
+                        if (hour < 17) {
+                            disableButton(btnClockOutActivity)
+                        }
+
+                        // 🔹 Aturan 2: Jika hari ini sudah ada jam_masuk / keluar
+                        val todayAttendance = attendanceData.firstOrNull { it.tanggal == todayStr }
+
+                        todayAttendance?.let {
+                            if (!it.jam_masuk.isNullOrBlank()) {
+                                disableButton(btnClockInActivity)
+                            }
+                            if (!it.jam_keluar.isNullOrBlank()) {
+                                disableButton(btnClockOutActivity)
+                            }
+                        }
+
+                        // 🔹 Tampilkan di RecyclerView
                         val formattedList = attendanceData.map {
                             val isLate = it.status?.contains("telat", ignoreCase = true) == true
                             val clockIn = it.jam_masuk?.substring(11, 16) ?: ""
@@ -106,6 +168,7 @@ class AbsenActivity : AppCompatActivity() {
                 }
             })
     }
+
 
 
     fun formatTanggalIndo(tanggal: String): String {
@@ -147,5 +210,11 @@ class AbsenActivity : AppCompatActivity() {
         val idSiswa = pref.getInt("id_siswa", 0)
 
         getAttendanceFromAPI(idSiswa)
+    }
+
+    private fun disableButton(button: Button) {
+        button.isEnabled = false
+        button.alpha = 0.5f
+        button.setBackgroundColor(Color.parseColor("#BDBDBD"))
     }
 }
