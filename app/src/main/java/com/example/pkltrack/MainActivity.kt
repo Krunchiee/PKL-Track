@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         val profileImage = findViewById<ImageView>(R.id.profile_image)
 
         if (!foto.isNullOrEmpty()) {
-            Glide.with(this).load(foto).into(profileImage)
+            Glide.with(this).load(foto).circleCrop().into(profileImage)
         }
 
         pendaftaranpkl = findViewById(R.id.pendaftaran_pkl)
@@ -119,6 +119,21 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         handler.postDelayed(runnable, slideInterval)
+
+        // REFRESH DATA USER DARI SharedPreferences
+        val pref = getSharedPreferences("UserData", MODE_PRIVATE)
+        val nama = pref.getString("nama", "User") ?: "User"
+        val nisn = pref.getString("nisn", "-") ?: "-"
+        val kelas = pref.getString("kelas", "-") ?: "-"
+        val foto = pref.getString("foto", "") // ambil dari key yang disimpan sebelumnya
+
+        findViewById<TextView>(R.id.txtUser).text = nama
+        findViewById<TextView>(R.id.txtNISJurusan).text = "$nisn - $kelas"
+
+        val profileImage = findViewById<ImageView>(R.id.profile_image)
+        if (!foto.isNullOrEmpty()) {
+            Glide.with(this).load(foto).circleCrop().into(profileImage)
+        }
     }
 
     override fun onPause() {

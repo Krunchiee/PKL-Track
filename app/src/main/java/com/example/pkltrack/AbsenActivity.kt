@@ -16,6 +16,7 @@ import com.example.pkltrack.adapter.AttendanceAdapter
 import com.example.pkltrack.model.Attendance
 import com.example.pkltrack.model.AttendanceResponse
 import com.example.pkltrack.model.AttendanceRequest
+import com.example.pkltrack.model.ServerTimeResponse
 import com.example.pkltrack.network.ApiClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,6 +34,7 @@ class AbsenActivity : AppCompatActivity() {
     private lateinit var btnClockInActivity: Button
     private lateinit var btnClockOutActivity: Button
     private val handler = Handler()
+    private var serverTimeInMillis: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +47,7 @@ class AbsenActivity : AppCompatActivity() {
         btnClockOutActivity= findViewById(R.id.btnClockOut)
 
         // Tampilkan waktu dan tanggal sekarang
-        updateTime()
+        updateTimeFromServer()
 
         // Data dummy untuk riwayat absensi
         recyclerHistory.layoutManager = LinearLayoutManager(this)
@@ -62,9 +64,8 @@ class AbsenActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtUser).text        = nama
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
         val profileImage = findViewById<ImageView>(R.id.profile_image)
-        val fotoUrl = "https://pkltrack.my.id/storage/foto/${foto}"
-        Glide.with(this).load(fotoUrl).into(profileImage)
-        getAttendanceFromAPI(idSiswa)
+        Glide.with(this).load(foto).circleCrop().into(profileImage)
+        getServerTimeAndAttendance(idSiswa)
 
         btnClockInActivity.setOnClickListener {
             startActivity(Intent(this, ClockInActivity::class.java))
@@ -109,7 +110,7 @@ class AbsenActivity : AppCompatActivity() {
 //            })
 //    }
 
-    private fun getAttendanceFromAPI(idSiswa: Int) {
+    private fun getAttendanceFromAPI(idSiswa: Int, hour: Int, minute: Int, todayStr: String) {
         val request = AttendanceRequest(idSiswa)
         ApiClient.getInstance(this).getAbsensi(request)
             .enqueue(object : Callback<AttendanceResponse> {
@@ -117,13 +118,7 @@ class AbsenActivity : AppCompatActivity() {
                     if (response.isSuccessful && response.body()?.success == true) {
                         val attendanceData = response.body()?.data ?: emptyList()
 
-                        // 🔹 Cek waktu sekarang dari device
-                        val calendarNow = Calendar.getInstance()
-                        val hour = calendarNow.get(Calendar.HOUR_OF_DAY)
-                        val minute = calendarNow.get(Calendar.MINUTE)
-                        val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendarNow.time)
-
-                        // 🔹 Aturan 1: Berdasarkan jam sekarang
+                        // 🔹 Aturan 1: Berdasarkan waktu server
                         if (hour > 7 || (hour == 7 && minute > 15)) {
                             disableButton(btnClockInActivity)
                         }
@@ -131,7 +126,7 @@ class AbsenActivity : AppCompatActivity() {
                             disableButton(btnClockOutActivity)
                         }
 
-                        // 🔹 Aturan 2: Jika hari ini sudah ada jam_masuk / keluar
+                        // 🔹 Aturan 2: Jika absensi hari ini sudah ada
                         val todayAttendance = attendanceData.firstOrNull { it.tanggal == todayStr }
 
                         todayAttendance?.let {
@@ -143,7 +138,7 @@ class AbsenActivity : AppCompatActivity() {
                             }
                         }
 
-                        // 🔹 Tampilkan di RecyclerView
+                        // 🔹 Set adapter recyclerView
                         val formattedList = attendanceData.map {
                             val isLate = it.status?.contains("telat", ignoreCase = true) == true
                             val clockIn = it.jam_masuk?.substring(11, 16) ?: ""
@@ -159,7 +154,7 @@ class AbsenActivity : AppCompatActivity() {
 
                         recyclerHistory.adapter = AttendanceAdapter(formattedList)
                     } else {
-                        Toast.makeText(this@AbsenActivity, "Gagal mengambil data", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AbsenActivity, "Gagal mengambil data absensi", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -184,16 +179,47 @@ class AbsenActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateTime() {
+    private fun updateTimeFromServer() {
+        ApiClient.getInstance(this).getServerTime()
+            .enqueue(object : Callback<ServerTimeResponse> {
+                override fun onResponse(call: Call<ServerTimeResponse>, response: Response<ServerTimeResponse>) {
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val serverTimeStr = response.body()!!.data.server_time // format: "2025-06-23 14:28:26"
+                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                        val parsedDate = sdf.parse(serverTimeStr)
+
+                        if (parsedDate != null) {
+                            serverTimeInMillis = parsedDate.time
+                            startLiveClock() // mulai update jam berdasarkan millis
+                        }
+                    } else {
+                        Toast.makeText(this@AbsenActivity, "Gagal ambil waktu server", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerTimeResponse>, t: Throwable) {
+                    Toast.makeText(this@AbsenActivity, "Gagal koneksi ke waktu server", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun startLiveClock() {
         handler.post(object : Runnable {
             override fun run() {
-                val localeID = Locale("in", "ID")
+                if (serverTimeInMillis > 0) {
+                    val currentTime = Date(serverTimeInMillis)
+                    val localeID = Locale("in", "ID")
 
-                val currentTime = SimpleDateFormat("HH.mm", localeID).format(Date())
-                val currentDate = SimpleDateFormat("EEEE, dd MMMM yyyy", localeID).format(Date())
+                    val timeFormat = SimpleDateFormat("HH.mm", localeID)
+                    val dateFormat = SimpleDateFormat("EEEE, dd MMMM yyyy", localeID)
 
-                txtLiveTime.text = currentTime
-                txtLiveDate.text = currentDate.replaceFirstChar { if (it.isLowerCase()) it.titlecase(localeID) else it.toString() }
+                    txtLiveTime.text = timeFormat.format(currentTime)
+                    txtLiveDate.text = dateFormat.format(currentTime)
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(localeID) else it.toString() }
+
+                    serverTimeInMillis += 1000 // tambahkan 1 detik
+                }
+
                 handler.postDelayed(this, 1000)
             }
         })
@@ -206,15 +232,45 @@ class AbsenActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val pref       = getSharedPreferences("UserData", MODE_PRIVATE)
+        val pref = getSharedPreferences("UserData", MODE_PRIVATE)
         val idSiswa = pref.getInt("id_siswa", 0)
 
-        getAttendanceFromAPI(idSiswa)
+        getServerTimeAndAttendance(idSiswa)
     }
 
     private fun disableButton(button: Button) {
         button.isEnabled = false
         button.alpha = 0.5f
         button.setBackgroundColor(Color.parseColor("#BDBDBD"))
+    }
+
+    private fun getServerTimeAndAttendance(idSiswa: Int) {
+        ApiClient.getInstance(this).getServerTime()
+            .enqueue(object : Callback<ServerTimeResponse> {
+                override fun onResponse(call: Call<ServerTimeResponse>, response: Response<ServerTimeResponse>) {
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val serverTimeStr = response.body()!!.data.server_time // "2025-06-23 14:28:26"
+                        val serverDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(serverTimeStr)
+
+                        serverDate?.let {
+                            val serverCal = Calendar.getInstance()
+                            serverCal.time = it
+
+                            val hour = serverCal.get(Calendar.HOUR_OF_DAY)
+                            val minute = serverCal.get(Calendar.MINUTE)
+                            val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(it)
+
+                            // 🔹 Lanjut ambil data absensi
+                            getAttendanceFromAPI(idSiswa, hour, minute, todayStr)
+                        }
+                    } else {
+                        Toast.makeText(this@AbsenActivity, "Gagal ambil waktu server", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerTimeResponse>, t: Throwable) {
+                    Toast.makeText(this@AbsenActivity, "Gagal koneksi ke server time", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 }

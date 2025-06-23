@@ -75,7 +75,7 @@ class DailyReportActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtNISJurusan).text = "$nisn - $kelas"
         val profileImage = findViewById<ImageView>(R.id.profile_image)
         if (!foto.isNullOrEmpty()) {
-            Glide.with(this).load(foto).into(profileImage)
+            Glide.with(this).load(foto).circleCrop().into(profileImage)
         }
 
         imgPlaceholder = findViewById(R.id.imagePlaceholder)

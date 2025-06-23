@@ -14,6 +14,7 @@ import com.example.pkltrack.model.PengajuanResponse
 import com.example.pkltrack.model.PengajuanInfoResponse
 import com.example.pkltrack.model.PenilaianResponse
 import com.example.pkltrack.model.ProfileResponse
+import com.example.pkltrack.model.ServerTimeResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -93,6 +94,9 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("id") idSiswa: Int
     ): Call<PengajuanInfoResponse>
+
+    @GET("absen/get-server-time")
+    fun getServerTime(): Call<ServerTimeResponse>
 
 }
 

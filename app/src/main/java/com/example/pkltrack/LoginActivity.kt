@@ -56,7 +56,8 @@ class LoginActivity : AppCompatActivity() {
                                 putString("nama", siswa.nama)
                                 putString("nisn", siswa.nisn)
                                 putString("kelas", siswa.kelas)
-                                putString("foto", siswa.foto)
+                                val fotoUrl = "https://pkltrack.my.id/${siswa.foto}"
+                                putString("foto", fotoUrl)
                                 putInt("id_siswa", siswa.id)
                                 apply()
                             }

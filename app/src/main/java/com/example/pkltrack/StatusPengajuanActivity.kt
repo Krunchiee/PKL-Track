@@ -49,7 +49,7 @@ class StatusPengajuanActivity : AppCompatActivity() {
         txtNISJurusan.text = "$nisn - $kelas"
 
         if (!foto.isNullOrEmpty()) {
-            Glide.with(this).load(foto).into(profileImage)
+            Glide.with(this).load(foto).circleCrop().into(profileImage)
         }
 
         txtNamaPerusahaan = findViewById(R.id.txtNamaPerusahaan)

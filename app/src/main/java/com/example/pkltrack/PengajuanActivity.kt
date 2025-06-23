@@ -54,18 +54,20 @@ class PengajuanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pengajuan)
 
+        //untuk membawa data ke header
         val pref = getSharedPreferences("UserData", MODE_PRIVATE)
         val nama = pref.getString("nama", "User") ?: "User"
         val nisn = pref.getString("nisn", "-") ?: "-"
         val kelas = pref.getString("kelas", "-") ?: "-"
         val foto = pref.getString("foto", "")
+        val idSiswa = pref.getInt("id_siswa", -1)
 
         findViewById<TextView>(R.id.txtUser).text        = nama
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
         val profileImage = findViewById<ImageView>(R.id.profile_image)
 
         if (!foto.isNullOrEmpty()) {
-            Glide.with(this).load(foto).into(profileImage)
+            Glide.with(this).load(foto).circleCrop().into(profileImage)
         }
 
         // Init Views

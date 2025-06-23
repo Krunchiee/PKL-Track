@@ -45,6 +45,7 @@ import retrofit2.HttpException
 import android.text.Spannable
 import android.text.style.ForegroundColorSpan
 import com.example.pkltrack.model.KoordinatResponse
+import com.example.pkltrack.model.ServerTimeResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -58,6 +59,7 @@ class ClockInActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var prefs: SharedPreferences
     private lateinit var apiService: ApiService
+    private var serverDate: Date? = null
 
     private var cancellationTokenSource = CancellationTokenSource()
     private val fusedLocationProviderClient: FusedLocationProviderClient by lazy {
@@ -118,7 +120,7 @@ class ClockInActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // ---- Time ----
-        txtTime.text = timeFmt.format(Date())
+        fetchServerTime()
 
         // ---- Listeners ----
         btnRefresh.setOnClickListener { refreshLocation()}
@@ -329,8 +331,9 @@ class ClockInActivity : AppCompatActivity() {
         }
 
 
-        val time = txtTime.text.toString()
-        val date = dateFmt.format(Date())
+        val now = serverDate ?: Date() // fallback pakai Date() jika gagal ambil server time
+        val time = timeFmt.format(now)
+        val date = dateFmt.format(now)
         val note = edtNote.text.toString()
 
         // Simpan lokal
@@ -384,4 +387,29 @@ class ClockInActivity : AppCompatActivity() {
         super.onPause()
         mapView.onPause()
     }
+
+    /* -------------------- Time From Server -------------------- */
+    private fun fetchServerTime() {
+        ApiClient.getInstance(this).getServerTime()
+            .enqueue(object : Callback<ServerTimeResponse> {
+                override fun onResponse(call: Call<ServerTimeResponse>, response: Response<ServerTimeResponse>) {
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val serverTimeStr = response.body()!!.data.server_time // "2025-06-23 14:28:26"
+                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                        val parsed = sdf.parse(serverTimeStr)
+                        if (parsed != null) {
+                            serverDate = parsed
+                            txtTime.text = timeFmt.format(parsed) // tampilkan jam dari server
+                        }
+                    } else {
+                        Toast.makeText(this@ClockInActivity, "Gagal ambil waktu server", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerTimeResponse>, t: Throwable) {
+                    Toast.makeText(this@ClockInActivity, "Error ambil waktu server", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
 }

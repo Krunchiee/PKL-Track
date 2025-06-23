@@ -91,10 +91,23 @@ class ProfileActivity : AppCompatActivity() {
                         siswaId = siswa.id
 
                         // Load photo
-                        val fotoUrl = "https://pkltrack.my.id/uploads/siswa/${siswa.foto}"
+                        val fotoUrl = "https://pkltrack.my.id/${siswa.foto}"
                         Glide.with(this@ProfileActivity)
                             .load(fotoUrl)
+                            .circleCrop()
                             .into(imgFoto)
+
+                        // Simpan ke SharedPreferences
+                        val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+                        with(sharedPref.edit()) {
+                            putString("nama", siswa.nama)
+                            putString("nisn", siswa.nisn)
+                            putString("kelas", siswa.kelas)
+                            putString("alamat", siswa.alamat)
+                            putString("no_hp", siswa.no_hp)
+                            putString("foto", fotoUrl)
+                            apply()
+                        }
                     } else {
                         Toast.makeText(this@ProfileActivity, "Data Siswa Kosong", Toast.LENGTH_SHORT).show()
                     }
@@ -142,6 +155,8 @@ class ProfileActivity : AppCompatActivity() {
                     val result = response.body()?.string()
                     Log.d("UPDATE_SUCCESS", "Body: $result")
                     Toast.makeText(this@ProfileActivity, "Profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+
+                    loadProfile()
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Log.e("UPDATE_FAILED", "Error Body: $errorBody")

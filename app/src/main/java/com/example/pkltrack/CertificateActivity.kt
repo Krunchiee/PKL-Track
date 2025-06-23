@@ -56,7 +56,7 @@ class CertificateActivity : AppCompatActivity() {
         txtNISJurusan.text = nisJurusan
 
         if (!foto.isNullOrEmpty()) {
-            Glide.with(this).load(foto).into(imgUser)
+            Glide.with(this).load(foto).circleCrop().into(imgUser)
         }
 
         if (idSiswa != -1) {

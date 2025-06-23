@@ -44,7 +44,7 @@ class AvailableMitraActivity : AppCompatActivity() {
         val profileImage = findViewById<ImageView>(R.id.profile_image)
 
         if (!foto.isNullOrEmpty()) {
-            Glide.with(this).load(foto).into(profileImage)
+            Glide.with(this).load(foto).circleCrop().into(profileImage)
         }
 
         if (idSiswa != -1) {
