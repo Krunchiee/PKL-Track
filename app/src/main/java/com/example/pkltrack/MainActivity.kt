@@ -191,22 +191,21 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         val body = response.body()
-                        val hasPengajuan = body?.has_pengajuan == true
-                        val idMitra = body?.data?.id_mitra
+                        val hasPengajuan = response.body()?.has_pengajuan == true
 
-                        if (hasPengajuan && !idMitra.isNullOrEmpty()) {
+                        if (hasPengajuan) {
                             setMenuAktif()
                         } else {
                             setMenuMati()
                         }
                     } else {
-                        // Misalnya: 422 atau id_siswa invalid
                         setMenuMati()
                     }
                 }
 
                 override fun onFailure(call: Call<PengajuanInfoResponse>, t: Throwable) {
                     setMenuMati()
+                    Toast.makeText(this@MainActivity, "Gagal Mendapatkan Data Siswa", Toast.LENGTH_SHORT).show()
                 }
             })
     }
