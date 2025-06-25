@@ -122,7 +122,7 @@ class AbsenActivity : AppCompatActivity() {
                         if (hour > 7 || (hour == 7 && minute > 15)) {
                             disableButton(btnClockInActivity)
                         }
-                        if (hour < 17) {
+                        if (hour < 16) {
                             disableButton(btnClockOutActivity)
                         }
 

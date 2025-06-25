@@ -15,7 +15,7 @@ data class PenilaianData(
     val id: Int,
     val id_siswa: String,
     val nilai_kompetensi: String?,
-    val catatan: String?,
+    val nilai_etika: String?,
     val created_at: String?,
     val updated_at: String?,
     val sertifikat: String?

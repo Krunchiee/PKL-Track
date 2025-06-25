@@ -4,6 +4,7 @@ import android.content.Intent
 import android.media.Image
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -12,6 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
+import com.example.pkltrack.StatusPengajuanActivity
+import com.example.pkltrack.model.PengajuanInfoResponse
+import com.example.pkltrack.model.PenilaianResponse
 import com.example.pkltrack.network.ApiClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
@@ -33,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var laporanHarian: LinearLayout
     private lateinit var penilaianMitra: LinearLayout
     private val slideInterval = 10000L // 3 seconds
+    private var siswaId: Int = -1
 
     private val images = listOf(
         R.drawable.banner1,
@@ -85,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         val nisn = pref.getString("nisn", "-") ?: "-"
         val kelas = pref.getString("kelas", "-") ?: "-"
         val foto = pref.getString("foto", "")
-        val idSiswa = pref.getInt("id_siswa", -1)
+        siswaId = pref.getInt("id_siswa", -1)
 
         findViewById<TextView>(R.id.txtUser).text        = nama
         findViewById<TextView>(R.id.txtNISJurusan).text  = nisn+" - "+kelas
@@ -120,12 +125,13 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         handler.postDelayed(runnable, slideInterval)
 
-        // REFRESH DATA USER DARI SharedPreferences
+        // Refresh UI
         val pref = getSharedPreferences("UserData", MODE_PRIVATE)
         val nama = pref.getString("nama", "User") ?: "User"
         val nisn = pref.getString("nisn", "-") ?: "-"
         val kelas = pref.getString("kelas", "-") ?: "-"
-        val foto = pref.getString("foto", "") // ambil dari key yang disimpan sebelumnya
+        val foto = pref.getString("foto", "")
+        siswaId = pref.getInt("id_siswa", -1)
 
         findViewById<TextView>(R.id.txtUser).text = nama
         findViewById<TextView>(R.id.txtNISJurusan).text = "$nisn - $kelas"
@@ -134,6 +140,10 @@ class MainActivity : AppCompatActivity() {
         if (!foto.isNullOrEmpty()) {
             Glide.with(this).load(foto).circleCrop().into(profileImage)
         }
+
+        // Cek apakah siswa sudah punya mitra
+        val token = "Bearer " + (pref.getString("token", "") ?: "")
+        checkMitraAndDisable(token)
     }
 
     override fun onPause() {
@@ -171,5 +181,65 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun checkMitraAndDisable(token: String) {
+        ApiClient.getInstance(this).cekPengajuanSiswa(token, siswaId)
+            .enqueue(object : Callback<PengajuanInfoResponse> {
+                override fun onResponse(
+                    call: Call<PengajuanInfoResponse>,
+                    response: Response<PengajuanInfoResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val body = response.body()
+                        val hasPengajuan = body?.has_pengajuan == true
+                        val idMitra = body?.data?.id_mitra
+
+                        if (hasPengajuan && !idMitra.isNullOrEmpty()) {
+                            setMenuAktif()
+                        } else {
+                            setMenuMati()
+                        }
+                    } else {
+                        // Misalnya: 422 atau id_siswa invalid
+                        setMenuMati()
+                    }
+                }
+
+                override fun onFailure(call: Call<PengajuanInfoResponse>, t: Throwable) {
+                    setMenuMati()
+                }
+            })
+    }
+
+    private fun setMenuAktif() {
+        absensi.isClickable = true
+        absensi.isFocusable = true
+        absensi.alpha = 1f
+
+        laporanHarian.isClickable = true
+        laporanHarian.isFocusable = true
+        laporanHarian.alpha = 1f
+
+        penilaianMitra.isClickable = true
+        penilaianMitra.isFocusable = true
+        penilaianMitra.alpha = 1f
+    }
+
+    private fun setMenuMati() {
+        absensi.isClickable = false
+        absensi.isFocusable = false
+        absensi.alpha = 0.5f
+
+        laporanHarian.isClickable = false
+        laporanHarian.isFocusable = false
+        laporanHarian.alpha = 0.5f
+
+        penilaianMitra.isClickable = false
+        penilaianMitra.isFocusable = false
+        penilaianMitra.alpha = 0.5f
+
+        Toast.makeText(this@MainActivity, "Silakan daftar PKL terlebih dahulu.", Toast.LENGTH_SHORT).show()
+    }
+
 
 }

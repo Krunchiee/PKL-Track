@@ -81,7 +81,7 @@ class CertificateActivity : AppCompatActivity() {
                     val pengajuan = response.body()?.data?.pengajuan
 
                     txtScore.text = pengajuan?.nilai_kompetensi ?: "-"
-                    txtDescription.text = pengajuan?.catatan?.ifEmpty { "-" } ?: "-"
+                    txtDescription.text = pengajuan?.nilai_etika?.ifEmpty { "-" } ?: "-"
 
                     val tanggal = pengajuan?.updated_at ?: pengajuan?.created_at ?: ""
                     txtDate.text = formatTanggalIndo(tanggal)
