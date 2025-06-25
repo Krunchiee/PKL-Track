@@ -33,7 +33,7 @@ data class ClockInRequest(
     @SerializedName("tanggal") val tanggal: String,
     @SerializedName("lat") val lat: Double,
     @SerializedName("lng") val lng: Double,
-    @SerializedName("status") val status: String,
+//    @SerializedName("status") val status: String,
     @SerializedName("keterangan") val keterangan: String
 )
 

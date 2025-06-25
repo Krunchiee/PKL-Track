@@ -1,6 +1,7 @@
 package com.example.pkltrack
 
 import android.content.Intent
+import android.graphics.Color
 import android.media.Image
 import android.os.Bundle
 import android.os.Handler
@@ -25,6 +26,9 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
@@ -191,9 +195,10 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         val body = response.body()
-                        val hasPengajuan = response.body()?.has_pengajuan == true
+                        val hasPengajuan = body?.has_pengajuan == true
+                        val status = body?.status == "1"
 
-                        if (hasPengajuan) {
+                        if (hasPengajuan && status) {
                             setMenuAktif()
                         } else {
                             setMenuMati()
@@ -211,33 +216,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setMenuAktif() {
-        absensi.isClickable = true
-        absensi.isFocusable = true
+        absensi.setOnClickListener {
+            startActivity(Intent(this, AbsenActivity::class.java))
+        }
+        laporanHarian.setOnClickListener {
+            startActivity(Intent(this, DailyReportActivity::class.java))
+        }
+        penilaianMitra.setOnClickListener {
+            startActivity(Intent(this, CertificateActivity::class.java))
+        }
+
         absensi.alpha = 1f
-
-        laporanHarian.isClickable = true
-        laporanHarian.isFocusable = true
         laporanHarian.alpha = 1f
-
-        penilaianMitra.isClickable = true
-        penilaianMitra.isFocusable = true
         penilaianMitra.alpha = 1f
     }
 
     private fun setMenuMati() {
-        absensi.isClickable = false
-        absensi.isFocusable = false
+        val listener = {
+            val dialog = MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle("Akses Ditolak")
+                .setMessage("Menu belum bisa diakses.\nSilakan daftar PKL terlebih dahulu.")
+//                .setPositiveButton("Mengerti", null)
+                .show()
+
+// Ubah warna tombol setelah dialog muncul
+//            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.BLUE)
+        }
+
+        absensi.setOnClickListener { listener() }
+        laporanHarian.setOnClickListener { listener() }
+        penilaianMitra.setOnClickListener { listener() }
+
         absensi.alpha = 0.5f
-
-        laporanHarian.isClickable = false
-        laporanHarian.isFocusable = false
         laporanHarian.alpha = 0.5f
-
-        penilaianMitra.isClickable = false
-        penilaianMitra.isFocusable = false
         penilaianMitra.alpha = 0.5f
-
-        Toast.makeText(this@MainActivity, "Silakan daftar PKL terlebih dahulu.", Toast.LENGTH_SHORT).show()
     }
 
 

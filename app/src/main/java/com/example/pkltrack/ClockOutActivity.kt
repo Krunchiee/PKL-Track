@@ -355,7 +355,7 @@ class ClockOutActivity : AppCompatActivity() {
             tanggal = date,
             lat = geo.latitude,
             lng = geo.longitude,
-            status = "Hadir",
+//            status = "Hadir",
             keterangan = note
         )
 
