@@ -53,7 +53,7 @@
                     android:id="@+id/scoreContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="84"
+                    android:text="-"
                     android:textSize="68sp"
                     android:textColor="@color/white"
                     android:textStyle="bold"
@@ -63,7 +63,7 @@
                     android:id="@+id/txtScoreDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Fri, 14 April 2023"
+                    android:text="Jum'at, 10 April 2023"
                     android:textColor="@color/black"
                     android:textSize="12sp"
                     android:layout_marginTop="8dp" />
@@ -107,7 +107,7 @@
                     android:id="@+id/txtDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/loremIpsum"
+                    android:text="-"
                     android:textSize="12sp"
                     android:textColor="@color/black"
                     android:layout_marginTop="8dp" />
