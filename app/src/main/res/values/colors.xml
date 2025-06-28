@@ -5,6 +5,7 @@
     <color name="light_green">#C9E753</color>
     <color name="dark_green">#6FB051</color>
     <color name="bottom_nav_icon">#FFFFFF</color>
+    <color name="dark_gray">#CCCCCC</color>
     <color name="transparent_light_green">#80C9E753</color>  <!-- 50% transparan -->
     <color name="transparent_dark_green">#806FB051</color> <!-- 50% transparan -->
 </resources>

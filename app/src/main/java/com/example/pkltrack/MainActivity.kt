@@ -1,33 +1,29 @@
 package com.example.pkltrack
 
 import android.content.Intent
-import android.graphics.Color
-import android.media.Image
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
+import android.view.View
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.example.pkltrack.StatusPengajuanActivity
+import com.example.pkltrack.model.NotificationResponse
 import com.example.pkltrack.model.PengajuanInfoResponse
-import com.example.pkltrack.model.PenilaianResponse
 import com.example.pkltrack.network.ApiClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import androidx.appcompat.app.AlertDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import android.util.Log
 
 
 class MainActivity : AppCompatActivity() {
@@ -44,9 +40,9 @@ class MainActivity : AppCompatActivity() {
     private var siswaId: Int = -1
 
     private val images = listOf(
-        R.drawable.banner1,
-        R.drawable.banner2,
-        R.drawable.banner3
+        R.drawable.banner3,
+        R.drawable.banner4,
+        R.drawable.banner5
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,6 +119,16 @@ class MainActivity : AppCompatActivity() {
         penilaianMitra.setOnClickListener {
             startActivity(Intent(this, CertificateActivity::class.java))
         }
+
+        val btnNotification = findViewById<ImageButton>(R.id.btnNotification)
+        btnNotification.setOnClickListener {
+            val intent = Intent(
+                this@MainActivity,
+                NotificationActivity::class.java
+            )
+            startActivity(intent)
+        }
+
     }
 
     override fun onResume() {
@@ -146,8 +152,35 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Cek apakah siswa sudah punya mitra
-        val token = "Bearer " + (pref.getString("token", "") ?: "")
+        val token = getSharedPreferences("UserData", MODE_PRIVATE).getString("token", "") ?: ""
         checkMitraAndDisable(token)
+        val badge = findViewById<TextView>(R.id.badgeCount)
+        badge.visibility = View.GONE
+        ApiClient.getInstance(this).getNotifications(nisn)
+            .enqueue(object : Callback<NotificationResponse> {
+            override fun onResponse(
+                call: Call<NotificationResponse>,
+                response: Response<NotificationResponse>
+            ) {
+
+                if (response.isSuccessful) {
+                    val notifs = response.body()?.data ?: emptyList()
+                    val baru = notifs.count { it.isNew }
+                    if (baru > 0) {
+                        badge.visibility = View.VISIBLE
+                        badge.text = baru.toString()
+                    } else {
+                        badge.visibility = View.GONE
+                    }
+                } else {
+                    badge.visibility = View.GONE
+                }
+            }
+
+            override fun onFailure(call: Call<NotificationResponse>, t: Throwable) {
+                badge.visibility = View.GONE
+            }
+        })
     }
 
     override fun onPause() {

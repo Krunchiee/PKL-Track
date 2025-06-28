@@ -10,11 +10,11 @@
         android:id="@+id/profile_image"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_user_24"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp"
         android:background="@drawable/circle_background"
         android:scaleType="centerCrop"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="8dp" />
+        android:src="@drawable/ic_user_24" />
 
     <!-- User Info -->
     <LinearLayout
@@ -43,6 +43,43 @@
             android:textColor="@android:color/white"
             android:textSize="12sp" />
     </LinearLayout>
+
+    <!-- Wrapper untuk ikon dan badge -->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/profile_image">
+
+        <ImageButton
+            android:id="@+id/btnNotification"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/baseline_notifications_24"
+            android:background="@android:color/transparent"
+            android:contentDescription="Notifikasi"
+            android:padding="8dp"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:id="@+id/badgeCount"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/badge_circle_red"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_alignTop="@id/btnNotification"
+            android:layout_alignEnd="@id/btnNotification"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            android:text="1"
+            android:visibility="gone"
+            android:elevation="8dp" />
+
+
+    </RelativeLayout>
+
 
     <!-- Bell Icon -->
 <!--    <ImageView-->
