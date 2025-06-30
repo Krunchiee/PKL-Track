@@ -3,16 +3,21 @@ package com.example.pkltrack.model
 
 import com.google.gson.annotations.SerializedName
 
-data class ProfileResponse(
-    @SerializedName("id") val id: Int,
-    @SerializedName("username") val username: String,
-    @SerializedName("email") val email: String,
-    @SerializedName("role") val role: String,
-    @SerializedName("created_at") val createdAt: String,
-    @SerializedName("updated_at") val updatedAt: String,
-    @SerializedName("siswa") val siswa: Profile?
-)
+//data class ProfileResponse(
+//    @SerializedName("id") val id: Int,
+//    @SerializedName("username") val username: String,
+//    @SerializedName("email") val email: String,
+//    @SerializedName("role") val role: String,
+//    @SerializedName("created_at") val createdAt: String,
+//    @SerializedName("updated_at") val updatedAt: String,
+//    @SerializedName("siswa") val siswa: Profile?
+//)
 
+data class ProfileResponse(
+    val success: Boolean,
+    val message: String,
+    val data: Profile?
+)
 
 data class Profile(
     val id: Int,

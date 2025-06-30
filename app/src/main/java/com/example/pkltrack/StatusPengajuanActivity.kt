@@ -59,7 +59,7 @@ class StatusPengajuanActivity : AppCompatActivity() {
     }
 
     private fun getStatusPengajuan(token: String) {
-        ApiClient.getInstance(this).cekPengajuanSiswa(token, siswaId)
+        ApiClient.getInstance(this).cekPengajuanSiswa(siswaId)
             .enqueue(object : Callback<PengajuanInfoResponse> {
                 override fun onResponse(
                     call: Call<PengajuanInfoResponse>,

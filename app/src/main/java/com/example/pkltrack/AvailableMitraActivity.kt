@@ -55,7 +55,7 @@ class AvailableMitraActivity : AppCompatActivity() {
     }
 
     private fun cekPengajuan(token: String, idSiswa: Int) {
-        ApiClient.getInstance(this).cekPengajuanSiswa(token, idSiswa)
+        ApiClient.getInstance(this).cekPengajuanSiswa(idSiswa)
             .enqueue(object : Callback<PengajuanInfoResponse> {
                 override fun onResponse(call: Call<PengajuanInfoResponse>, response: Response<PengajuanInfoResponse>) {
                     if (response.isSuccessful && response.body()?.has_pengajuan == true) {

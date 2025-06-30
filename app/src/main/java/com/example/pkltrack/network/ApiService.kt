@@ -49,8 +49,8 @@ interface ApiService {
         @Body body: ClockInRequest
     ): Call<ClockInResponse>
 
-    @GET("me")
-    fun getProfile(@Header("Authorization") token: String): Call<ProfileResponse>
+    @GET("siswa/bio/{id}")
+    fun getProfile(@Path("id") id: Int): Call<ProfileResponse>
 
     @Multipart
     @POST("siswa/update/{id}")
@@ -62,7 +62,7 @@ interface ApiService {
 
     @POST("logout")
     fun logout(
-        @Header("Authorization") token: String
+//        @Header("Authorization") token: String
     ): Call<Void>
 
     @GET("siswa/penilaian/{id}")
@@ -82,7 +82,7 @@ interface ApiService {
     @Multipart
     @POST("siswa/pengajuan-awal")
     fun submitPengajuan(
-        @Header("Authorization") token: String,
+//        @Header("Authorization") token: String,
         @Part("id_siswa") idSiswa: RequestBody,
         @Part("id_mitra") idMitra: RequestBody,
         @Part berkasCV: MultipartBody.Part
@@ -90,12 +90,12 @@ interface ApiService {
 
     @GET("siswa/list-jurusan")
     fun getListJurusan(
-        @Header("Authorization") token: String
+
     ): Call<JurusanListResponse>
 
     @GET("siswa/cek-pengajuan/{id}")
     fun cekPengajuanSiswa(
-        @Header("Authorization") token: String,
+//        @Header("Authorization") token: String,
         @Path("id") idSiswa: Int
     ): Call<PengajuanInfoResponse>
 

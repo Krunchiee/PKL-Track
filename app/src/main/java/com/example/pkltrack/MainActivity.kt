@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        ApiClient.getInstance(this).logout("Bearer $token").enqueue(object : Callback<Void> {
+        ApiClient.getInstance(this).logout().enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     // Hapus session / SharedPreferences
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkMitraAndDisable(token: String) {
-        ApiClient.getInstance(this).cekPengajuanSiswa(token, siswaId)
+        ApiClient.getInstance(this).cekPengajuanSiswa(siswaId)
             .enqueue(object : Callback<PengajuanInfoResponse> {
                 override fun onResponse(
                     call: Call<PengajuanInfoResponse>,

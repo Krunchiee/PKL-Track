@@ -146,7 +146,7 @@ class PengajuanActivity : AppCompatActivity() {
             Toast.makeText(this, "Mengirim pengajuan...", Toast.LENGTH_SHORT).show()
 
             ApiClient.getInstance(this).submitPengajuan(
-                "Bearer $token", siswaIdBody, mitraIdBody, cvPart
+               siswaIdBody, mitraIdBody, cvPart
             ).enqueue(object : Callback<PengajuanResponse> {
                 override fun onResponse(call: Call<PengajuanResponse>, response: Response<PengajuanResponse>) {
                     if (response.isSuccessful && response.body()?.success == true) {
@@ -223,7 +223,7 @@ class PengajuanActivity : AppCompatActivity() {
     private fun loadJurusanData() {
         val token = getSharedPreferences("UserData", MODE_PRIVATE).getString("token", "") ?: ""
 
-        ApiClient.getInstance(this).getListJurusan("Bearer $token")
+        ApiClient.getInstance(this).getListJurusan()
             .enqueue(object : Callback<JurusanListResponse> {
                 override fun onResponse(call: Call<JurusanListResponse>, response: Response<JurusanListResponse>) {
                     if (response.isSuccessful && response.body()?.success == true) {

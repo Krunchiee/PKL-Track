@@ -68,16 +68,17 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun loadProfile() {
         val token = getSharedPreferences("UserData", MODE_PRIVATE).getString("token", null)
+        val idSiswa = getSharedPreferences("UserData", MODE_PRIVATE).getInt("id_siswa", -1)
         if (token == null) {
             Toast.makeText(this, "Token tidak ditemukan", Toast.LENGTH_SHORT).show()
             return
         }
 
-        ApiClient.getInstance(this).getProfile("Bearer $token").enqueue(object : Callback<ProfileResponse> {
+        ApiClient.getInstance(this).getProfile(idSiswa).enqueue(object : Callback<ProfileResponse> {
             override fun onResponse(call: Call<ProfileResponse>, response: Response<ProfileResponse>) {
                 if (response.isSuccessful) {
                     val profile = response.body()
-                    val siswa = profile?.siswa
+                    val siswa = profile?.data
 
                     if (siswa != null) {
                         // Fill your UI
