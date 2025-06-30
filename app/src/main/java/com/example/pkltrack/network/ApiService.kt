@@ -71,7 +71,7 @@ interface ApiService {
     @Multipart
     @POST("siswa/laporan")
     fun uploadLaporan(
-        @Part("id_siswa") idSiswa: Int,
+        @Part("id_siswa") idSiswa: RequestBody,
         @Part("keterangan") keterangan: RequestBody,
         @Part photo: MultipartBody.Part?
     ): Call<ResponseBody>

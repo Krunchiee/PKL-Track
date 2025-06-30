@@ -98,6 +98,7 @@ class DailyReportActivity : AppCompatActivity() {
 
     private fun performSubmit(idSiswa: Int) {
         val description = edtDescription.text.toString().trim()
+        val idSiswaPart = idSiswa.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
         if (selectedUri == null) {
             Toast.makeText(this, "Silakan pilih gambar dokumentasi!", Toast.LENGTH_SHORT).show()
@@ -115,11 +116,11 @@ class DailyReportActivity : AppCompatActivity() {
         }
 
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        val imagePart = MultipartBody.Part.createFormData("gambar", file.name, requestFile)
+        val imagePart = MultipartBody.Part.createFormData("photo", file.name, requestFile)
         val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
 
         ApiClient.getInstance(this)
-            .uploadLaporan(idSiswa = idSiswa, photo = imagePart, keterangan = descriptionPart)
+            .uploadLaporan(idSiswa = idSiswaPart, photo = imagePart, keterangan = descriptionPart)
             .enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
