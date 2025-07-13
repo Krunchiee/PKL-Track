@@ -4,7 +4,7 @@ import com.example.pkltrack.model.LoginResponse
 import com.example.pkltrack.model.LoginRequest
 import com.example.pkltrack.model.AttendanceResponse
 import com.example.pkltrack.model.AttendanceRequest
-import com.example.pkltrack.model.ClockInRequest
+//import com.example.pkltrack.model.ClockInRequest
 import com.example.pkltrack.model.KoordinatResponse
 import com.example.pkltrack.model.ClockInResponse
 import com.example.pkltrack.model.DailyReportResponse
@@ -44,9 +44,15 @@ interface ApiService {
     @POST("absen/koordinat")
     fun getKoordinat(@Body request: Map<String, Int>): Call<KoordinatResponse>
 
+    @Multipart
     @POST("absen/store")
     fun postClockIn(
-        @Body body: ClockInRequest
+        @Part("id_siswa") idSiswa: RequestBody,
+        @Part("tanggal") tanggal: RequestBody,
+        @Part("lat") lat: RequestBody,
+        @Part("lng") lng: RequestBody,
+        @Part("keterangan") keterangan: RequestBody,
+        @Part foto: MultipartBody.Part?
     ): Call<ClockInResponse>
 
     @GET("siswa/bio/{id}")

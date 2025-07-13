@@ -3,11 +3,15 @@ package com.example.pkltrack
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.SpannableString
 import android.util.Log
 import android.widget.Button
@@ -21,7 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.pkltrack.network.ApiClient
 import com.example.pkltrack.network.ApiService
-import com.example.pkltrack.model.ClockInRequest
+//import com.example.pkltrack.model.ClockInRequest
 import com.example.pkltrack.model.ClockInResponse
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -44,12 +48,19 @@ import org.osmdroid.views.overlay.Polygon
 import retrofit2.HttpException
 import android.text.Spannable
 import android.text.style.ForegroundColorSpan
+import androidx.core.content.FileProvider
 import com.example.pkltrack.ClockInActivity.Companion
 import com.example.pkltrack.model.KoordinatResponse
 import com.example.pkltrack.model.ServerTimeResponse
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -80,6 +91,10 @@ class ClockOutActivity : AppCompatActivity() {
 
     private var centerLocation: GeoPoint? = null
     private var allowedRadiusMeters: Double = 1000.0
+
+    private lateinit var photoUri: Uri
+    private lateinit var photoFile: File
+    private val CAMERA_REQUEST_CODE = 2002
 
     companion object {
         private const val REQ_LOCATION = 1001
@@ -125,11 +140,127 @@ class ClockOutActivity : AppCompatActivity() {
 
         // ---- Listeners ----
         btnRefresh.setOnClickListener { refreshLocation()}
-        btnClockIn.setOnClickListener { saveAndSendClockIn() }
+        btnClockIn.setOnClickListener { dispatchTakePictureIntent() }
         btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+
+        checkAndRequestCameraPermission()
 
         // ---- Initial location ----
         refreshLocation()
+    }
+
+    /* -------------------- CAMERA -------------------- */
+    private fun checkAndRequestCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1002)
+        }
+    }
+    private fun dispatchTakePictureIntent() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (intent.resolveActivity(packageManager) != null) {
+            val photoFile = createImageFile()
+            photoFile?.also {
+                val uri = FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    it
+                )
+                photoUri = uri
+                this.photoFile = it
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                startActivityForResult(intent, CAMERA_REQUEST_CODE)
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("IMG_$timestamp", ".jpg", storageDir)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+            if (::photoFile.isInitialized && photoFile.exists()) {
+                saveAndSendClockIn(photoFile)
+            } else {
+                Toast.makeText(this, "File foto tidak ditemukan", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun saveAndSendClockIn(photo: File) {
+        val geo = currentGeo
+        if (geo == null) {
+            Toast.makeText(this, "Lokasi belum tersedia", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (centerLocation == null) {
+            Toast.makeText(this, "Lokasi pusat belum tersedia", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 👉 Validasi radius
+        if (!isWithinRadius(geo, centerLocation!!, allowedRadiusMeters)) {
+            Toast.makeText(this, "Kamu di luar radius absen (1 km)", Toast.LENGTH_LONG).show()
+            txtStatus.text = "Di Luar Area Absen"
+            txtStatus.setTextColor(Color.RED)
+            return
+        }
+
+        val now = serverDate ?: Date()
+        val time = timeFmt.format(now)
+        val date = dateFmt.format(now)
+        val note = edtNote.text.toString()
+
+        // Simpan lokal
+        with(prefs.edit()) {
+            putString("time", time)
+            putString("date", date)
+            putString("location", txtLocation.text.toString())
+            putString("note", note)
+            apply()
+        }
+
+        // Prepare RequestBody parts
+        val userPrefs = getSharedPreferences("UserData", MODE_PRIVATE)
+        val idSiswa = userPrefs.getInt("id_siswa", 0)
+
+        val sidSiswa        = idSiswa.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val tanggal   = date.toRequestBody("text/plain".toMediaTypeOrNull())
+        val lat       = geo.latitude.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val lng       = geo.longitude.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val keterangan      = note.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val requestFile = photo.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val foto   = MultipartBody.Part.createFormData("foto", photo.name, requestFile)
+
+        txtStatus.text = "Mengirim..."
+
+        ApiClient.getInstance(this).postClockIn(sidSiswa,tanggal,lat,lng,keterangan,foto).enqueue(object : Callback<ClockInResponse> {
+            override fun onResponse(call: Call<ClockInResponse>, response: Response<ClockInResponse>) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    txtStatus.text = "Berhasil Clock Out"
+                    txtStatus.setTextColor(ContextCompat.getColor(this@ClockOutActivity, R.color.light_green))
+                    Toast.makeText(this@ClockOutActivity, "Clock In berhasil", Toast.LENGTH_SHORT).show()
+//                    val intent = Intent(this@ClockInActivity, AbsenActivity::class.java)
+//                    startActivity(intent)
+//                    finish()
+                } else {
+                    txtStatus.text = "Gagal Clock Out"
+                }
+            }
+
+            override fun onFailure(call: Call<ClockInResponse>, t: Throwable) {
+                txtStatus.text = "Error saat Clock Out"
+                Toast.makeText(this@ClockOutActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     /* -------------------- LOCATION -------------------- */
@@ -276,10 +407,26 @@ class ClockOutActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQ_LOCATION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == com.example.pkltrack.ClockOutActivity.REQ_LOCATION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             refreshLocation()
         } else {
             Toast.makeText(this, "Izin lokasi ditolak", Toast.LENGTH_SHORT).show()
+        }
+
+        when (requestCode) {
+            1001 -> { // Lokasi
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    refreshLocation()
+                } else {
+                    Toast.makeText(this, "Izin lokasi ditolak", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            1002 -> { // Kamera
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Izin kamera diperlukan untuk mengambil foto", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -312,71 +459,71 @@ class ClockOutActivity : AppCompatActivity() {
     }
 
     /* -------------------- CLOCK OUT -------------------- */
-    private fun saveAndSendClockIn() {
-        val geo = currentGeo
-        if (geo == null) {
-            Toast.makeText(this, "Lokasi belum tersedia", Toast.LENGTH_SHORT).show(); return
-        }
-
-        if (centerLocation == null) {
-            Toast.makeText(this, "Lokasi pusat belum tersedia", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // 👉 Validasi radius
-        if (!isWithinRadius(geo, centerLocation!!, allowedRadiusMeters)) {
-            Toast.makeText(this, "Kamu di luar radius absen (1 km)", Toast.LENGTH_LONG).show()
-            txtStatus.text = "Di Luar Area Absen"
-            txtStatus.setTextColor(Color.RED)
-            return
-        }
-
-
-        val now = serverDate ?: Date() // fallback pakai Date() jika gagal ambil server time
-        val time = timeFmt.format(now)
-        val date = dateFmt.format(now)
-        val note = edtNote.text.toString()
-
-        // Simpan lokal
-        with(prefs.edit()) {
-            putString("time", time)
-            putString("date", date)
-            putString("location", txtLocation.text.toString())
-            putString("note", note)
-            apply()
-        }
-
-        // Kirim ke API
-        val userPrefs = getSharedPreferences("UserData", MODE_PRIVATE)
-        val idSiswa = userPrefs.getInt("id_siswa", 0)
-
-        val clockInRequest = ClockInRequest(
-            idSiswa = idSiswa,
-            tanggal = date,
-            lat = geo.latitude,
-            lng = geo.longitude,
-//            status = "Hadir",
-            keterangan = note
-        )
-
-        txtStatus.text = "Mengirim..."
-        ApiClient.getInstance(this).postClockIn(clockInRequest).enqueue(object : Callback<ClockInResponse> {
-            override fun onResponse(call: Call<ClockInResponse>, response: Response<ClockInResponse>) {
-                if (response.isSuccessful && response.body()?.success == true) {
-                    txtStatus.text = "Berhasil Clock Out"
-                    txtStatus.setTextColor(ContextCompat.getColor(this@ClockOutActivity, R.color.light_green))
-                    Toast.makeText(this@ClockOutActivity, "Clock Out berhasil", Toast.LENGTH_SHORT).show()
-                } else {
-                    txtStatus.text = "Gagal Clock Out"
-                }
-            }
-
-            override fun onFailure(call: Call<ClockInResponse>, t: Throwable) {
-                txtStatus.text = "Error saat Clock Out"
-                Toast.makeText(this@ClockOutActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
+//    private fun saveAndSendClockIn() {
+//        val geo = currentGeo
+//        if (geo == null) {
+//            Toast.makeText(this, "Lokasi belum tersedia", Toast.LENGTH_SHORT).show(); return
+//        }
+//
+//        if (centerLocation == null) {
+//            Toast.makeText(this, "Lokasi pusat belum tersedia", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//
+//        // 👉 Validasi radius
+//        if (!isWithinRadius(geo, centerLocation!!, allowedRadiusMeters)) {
+//            Toast.makeText(this, "Kamu di luar radius absen (1 km)", Toast.LENGTH_LONG).show()
+//            txtStatus.text = "Di Luar Area Absen"
+//            txtStatus.setTextColor(Color.RED)
+//            return
+//        }
+//
+//
+//        val now = serverDate ?: Date() // fallback pakai Date() jika gagal ambil server time
+//        val time = timeFmt.format(now)
+//        val date = dateFmt.format(now)
+//        val note = edtNote.text.toString()
+//
+//        // Simpan lokal
+//        with(prefs.edit()) {
+//            putString("time", time)
+//            putString("date", date)
+//            putString("location", txtLocation.text.toString())
+//            putString("note", note)
+//            apply()
+//        }
+//
+//        // Kirim ke API
+//        val userPrefs = getSharedPreferences("UserData", MODE_PRIVATE)
+//        val idSiswa = userPrefs.getInt("id_siswa", 0)
+//
+//        val clockInRequest = ClockInRequest(
+//            idSiswa = idSiswa,
+//            tanggal = date,
+//            lat = geo.latitude,
+//            lng = geo.longitude,
+////            status = "Hadir",
+//            keterangan = note
+//        )
+//
+//        txtStatus.text = "Mengirim..."
+//        ApiClient.getInstance(this).postClockIn(clockInRequest).enqueue(object : Callback<ClockInResponse> {
+//            override fun onResponse(call: Call<ClockInResponse>, response: Response<ClockInResponse>) {
+//                if (response.isSuccessful && response.body()?.success == true) {
+//                    txtStatus.text = "Berhasil Clock Out"
+//                    txtStatus.setTextColor(ContextCompat.getColor(this@ClockOutActivity, R.color.light_green))
+//                    Toast.makeText(this@ClockOutActivity, "Clock Out berhasil", Toast.LENGTH_SHORT).show()
+//                } else {
+//                    txtStatus.text = "Gagal Clock Out"
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<ClockInResponse>, t: Throwable) {
+//                txtStatus.text = "Error saat Clock Out"
+//                Toast.makeText(this@ClockOutActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+//            }
+//        })
+//    }
 
     /* -------------------- Lifecycle for MapView -------------------- */
     override fun onResume() {
